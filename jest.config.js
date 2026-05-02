@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'react-native',
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native|@react-native-community|@react-navigation|react-native-screens|react-native-safe-area-context|tamagui|@tamagui)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native|@react-native-community|@react-navigation|react-native-screens|react-native-safe-area-context)/)',
   ],
 };

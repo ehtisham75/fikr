@@ -1,32 +1,36 @@
 import React from 'react'
-import { Button, H1, Paragraph, YStack } from 'tamagui/native'
+import { StyleSheet, View } from 'react-native'
+import { AppButton, AppScreen, AppText } from '../../components'
 
 const SplashScreen = ({ navigation }) => {
   return (
-    <YStack
-      flex={1}
-      backgroundColor="$background"
-      padding="$5"
-      justifyContent="center"
-      gap="$4">
-      <YStack gap="$2">
-        <Paragraph size="$3" color="$color10">
-          Tamagui is ready
-        </Paragraph>
-        <H1 color="$color" size="$10">
-          Fikr
-        </H1>
-        <Paragraph size="$5" color="$color11">
-          Your app is wrapped in TamaguiProvider and using Tamagui tokens,
-          themes, and components.
-        </Paragraph>
-      </YStack>
+    <AppScreen contentStyle={styles.screen}>
+      <View style={styles.copy}>
+        <AppText variant="eyebrow" muted>
+          Welcome
+        </AppText>
+        <AppText variant="title">Fikr</AppText>
+        <AppText muted>
+          Your app now uses local reusable components from src/components,
+          ready for the next screens.
+        </AppText>
+      </View>
 
-      <Button theme="active" size="$4" onPress={() => navigation.navigate('Home')}>
+      <AppButton onPress={() => navigation.navigate('Home')}>
         Continue
-      </Button>
-    </YStack>
+      </AppButton>
+    </AppScreen>
   )
 }
 
 export default SplashScreen
+
+const styles = StyleSheet.create({
+  screen: {
+    justifyContent: 'center',
+  },
+  copy: {
+    gap: 10,
+    marginBottom: 28,
+  },
+})

@@ -1,28 +1,41 @@
 import React from 'react'
-import { Button, H2, Paragraph, Separator, XStack, YStack } from 'tamagui/native'
+import { StyleSheet, View } from 'react-native'
+import { AppButton, AppScreen, AppText } from '../../components'
 
 const HomeScreen = () => {
   return (
-    <YStack flex={1} backgroundColor="$background" padding="$5" justifyContent="center" gap="$5">
-      <YStack gap="$2">
-        <H2 color="$color">Home</H2>
-        <Paragraph size="$5" color="$color11">
-          This screen is rendered with Tamagui layout and typography primitives.
-        </Paragraph>
-      </YStack>
+    <AppScreen contentStyle={styles.screen}>
+      <View style={styles.copy}>
+        <AppText variant="heading">Home</AppText>
+        <AppText muted>
+          This screen is rendered with your own app components, ready to extend
+          as the product grows.
+        </AppText>
+      </View>
 
-      <Separator />
-
-      <XStack gap="$3" flexWrap="wrap">
-        <Button size="$4" theme="active">
+      <View style={styles.actions}>
+        <AppButton>
           Primary Action
-        </Button>
-        <Button size="$4" variant="outlined">
+        </AppButton>
+        <AppButton variant="secondary">
           Secondary
-        </Button>
-      </XStack>
-    </YStack>
+        </AppButton>
+      </View>
+    </AppScreen>
   )
 }
 
 export default HomeScreen
+
+const styles = StyleSheet.create({
+  screen: {
+    justifyContent: 'center',
+  },
+  copy: {
+    gap: 10,
+    marginBottom: 28,
+  },
+  actions: {
+    gap: 12,
+  },
+})
