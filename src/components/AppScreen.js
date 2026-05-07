@@ -1,6 +1,7 @@
 import React from 'react'
 import { StyleSheet, useColorScheme } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import COLORS from '../theme/colors'
 
 const AppScreen = ({ children, contentStyle }) => {
   const isDarkMode = useColorScheme() === 'dark'
@@ -24,10 +25,10 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   screenLight: {
-    backgroundColor: '#f7f2ea',
+    backgroundColor: COLORS.background,
   },
   screenDark: {
-    backgroundColor: '#101314',
+    backgroundColor: COLORS.secondary,
   },
 })
 

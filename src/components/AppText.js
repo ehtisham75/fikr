@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, useColorScheme } from 'react-native'
+import COLORS from '../theme/colors'
 
 const AppText = ({ children, muted = false, style, variant = 'body' }) => {
   const isDarkMode = useColorScheme() === 'dark'
@@ -46,16 +47,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   textLight: {
-    color: '#17201d',
+    color: COLORS.text.black2,
   },
   textDark: {
-    color: '#f4f1ea',
+    color: COLORS.text.white,
   },
   mutedLight: {
-    color: '#69736c',
+    color: COLORS.text.gray,
   },
   mutedDark: {
-    color: '#b3bbb4',
+    color: COLORS.text.gray,
   },
 })
 

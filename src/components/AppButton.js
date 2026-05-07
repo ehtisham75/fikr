@@ -5,10 +5,13 @@ import {
   Text,
   useColorScheme,
 } from 'react-native'
+import COLORS from '../theme/colors'
 
-const AppButton = ({ children, onPress, variant = 'primary' }) => {
+const AppButton = ({ children, onPress, variant = 'primary', style, textStyle }) => {
   const isDarkMode = useColorScheme() === 'dark'
   const isPrimary = variant === 'primary'
+  const isSecondary = variant === 'secondary'
+  const isGhost = variant === 'ghost'
 
   return (
     <Pressable
@@ -16,11 +19,20 @@ const AppButton = ({ children, onPress, variant = 'primary' }) => {
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        isPrimary ? styles.primary : styles.secondary,
-        !isPrimary && (isDarkMode ? styles.secondaryDark : styles.secondaryLight),
+        isPrimary && styles.primary,
+        isSecondary && styles.secondary,
+        isSecondary && (isDarkMode ? styles.secondaryDark : styles.secondaryLight),
+        isGhost && styles.ghost,
         pressed && styles.pressed,
+        style,
       ]}>
-      <Text style={[styles.label, isPrimary ? styles.primaryLabel : styles.secondaryLabel]}>
+      <Text style={[
+        styles.label,
+        isPrimary && styles.primaryLabel,
+        isSecondary && styles.secondaryLabel,
+        isGhost && styles.ghostLabel,
+        textStyle
+      ]}>
         {children}
       </Text>
     </Pressable>
@@ -29,38 +41,49 @@ const AppButton = ({ children, onPress, variant = 'primary' }) => {
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
-    borderRadius: 8,
+    minHeight: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 18,
+    flexDirection: 'row',
   },
   primary: {
-    backgroundColor: '#246b51',
+    backgroundColor: COLORS.primary,
   },
   secondary: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     backgroundColor: 'transparent',
   },
   secondaryLight: {
-    borderColor: '#c7d0c8',
+    borderColor: COLORS.border.lightGray,
   },
   secondaryDark: {
-    borderColor: '#3d4741',
+    borderColor: COLORS.border.gray,
+  },
+  ghost: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    minHeight: 48,
   },
   pressed: {
-    opacity: 0.78,
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   label: {
     fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0,
+    letterSpacing: 0.5,
   },
   primaryLabel: {
-    color: '#ffffff',
+    color: COLORS.text.white,
   },
   secondaryLabel: {
-    color: '#246b51',
+    color: COLORS.primary,
+  },
+  ghostLabel: {
+    color: '#9CA3AF',
+    fontWeight: '600',
   },
 })
 

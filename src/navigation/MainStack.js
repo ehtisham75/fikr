@@ -1,20 +1,28 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import SplashScreen from '../screens/welcome/SplashScreen'
+import WelcomeScreen from '../screens/welcome/WelcomeScreen'
 import HomeScreen from '../screens/home/HomeScreen'
-
+import SignInScreen from '../screens/auth/SignInScreen'
+import SignUpScreen from '../screens/auth/SignUpScreen'
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'
+import ROUTES from '../utils/routes'
 const Stack = createNativeStackNavigator()
 
 const MainStack = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName={ROUTES.SPLASH}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: 'transparent' },
       }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name={ROUTES.SPLASH} component={SplashScreen} />
+      <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
+      <Stack.Screen name={ROUTES.HOME} component={HomeScreen} />
+      <Stack.Screen name={ROUTES.SIGN_IN} component={SignInScreen} />
+      <Stack.Screen name={ROUTES.SIGN_UP} component={SignUpScreen} />
+      <Stack.Screen name={ROUTES.FORGOT_PASSWORD} component={ForgotPasswordScreen} />
     </Stack.Navigator>
   )
 }
