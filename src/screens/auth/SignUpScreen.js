@@ -34,13 +34,13 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <AppScreen contentStyle={styles.screen}>
-      <KeyboardAvoidingView 
-        style={styles.container} 
+      <KeyboardAvoidingView
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
-            
+
             {/* Header */}
             <View style={styles.header}>
               <AppText variant="title" style={styles.title}>
@@ -91,13 +91,13 @@ const SignUpScreen = ({ navigation }) => {
 
             {/* Actions */}
             <View style={styles.actions}>
-              <AppButton 
+              <AppButton
                 onPress={handleSignup}
                 disabled={!name || !email || !password}
               >
                 Sign up
               </AppButton>
-              <Pressable 
+              <Pressable
                 onPress={() => navigation.navigate(ROUTES.SIGN_IN)}
                 style={styles.footerLinkContainer}
               >
