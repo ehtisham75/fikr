@@ -3,13 +3,31 @@ import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedb
 import { AppScreen, AppText, AppTextInput, AppButton } from '../../components';
 import ROUTES from '../../utils/routes';
 import COLORS from '../../theme/colors';
+import { signupSchema } from '../../utils/authValidator';
 
 const SignUpScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleSignup = () => {
+    // Clear previous errors
+    setErrors({});
+
+    // Validate using Zod
+    const validationResult = signupSchema.safeParse({ name, email, password });
+
+    if (!validationResult.success) {
+      // Map Zod errors to our state
+      const formattedErrors = {};
+      validationResult.error.issues.forEach(issue => {
+        formattedErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(formattedErrors);
+      return;
+    }
+
     // Supabase signup logic will go here
     console.log('Signup pressed:', email);
   };
@@ -40,7 +58,11 @@ const SignUpScreen = ({ navigation }) => {
                 placeholder="Enter your name"
                 autoCapitalize="words"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (errors.name) setErrors({ ...errors, name: null });
+                }}
+                error={errors.name}
               />
               <AppTextInput
                 label="Email"
@@ -48,20 +70,31 @@ const SignUpScreen = ({ navigation }) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.email) setErrors({ ...errors, email: null });
+                }}
+                error={errors.email}
               />
               <AppTextInput
                 label="Password"
                 placeholder="Create a password"
                 secureTextEntry
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password) setErrors({ ...errors, password: null });
+                }}
+                error={errors.password}
               />
             </View>
 
             {/* Actions */}
             <View style={styles.actions}>
-              <AppButton onPress={handleSignup}>
+              <AppButton 
+                onPress={handleSignup}
+                disabled={!name || !email || !password}
+              >
                 Sign up
               </AppButton>
               <Pressable 

@@ -3,12 +3,30 @@ import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedb
 import { AppScreen, AppText, AppTextInput, AppButton } from '../../components';
 import ROUTES from '../../utils/routes';
 import COLORS from '../../theme/colors';
+import { loginSchema } from '../../utils/authValidator';
 
 const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleLogin = () => {
+    // Clear previous errors
+    setErrors({});
+
+    // Validate using Zod
+    const validationResult = loginSchema.safeParse({ email, password });
+
+    if (!validationResult.success) {
+      // Map Zod errors to our state
+      const formattedErrors = {};
+      validationResult.error.issues.forEach(issue => {
+        formattedErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(formattedErrors);
+      return;
+    }
+
     // Supabase login logic will go here
     console.log('Login pressed:', email);
   };
@@ -40,14 +58,22 @@ const SignInScreen = ({ navigation }) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.email) setErrors({ ...errors, email: null });
+                }}
+                error={errors.email}
               />
               <AppTextInput
                 label="Password"
                 placeholder="Enter your password"
                 secureTextEntry
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password) setErrors({ ...errors, password: null });
+                }}
+                error={errors.password}
               />
               <Pressable 
                 onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
@@ -61,7 +87,10 @@ const SignInScreen = ({ navigation }) => {
 
             {/* Actions */}
             <View style={styles.actions}>
-              <AppButton onPress={handleLogin}>
+              <AppButton 
+                onPress={handleLogin}
+                disabled={!email || !password}
+              >
                 Log in
               </AppButton>
               <Pressable 

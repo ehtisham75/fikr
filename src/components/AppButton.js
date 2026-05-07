@@ -7,7 +7,7 @@ import {
 } from 'react-native'
 import COLORS from '../theme/colors'
 
-const AppButton = ({ children, onPress, variant = 'primary', style, textStyle }) => {
+const AppButton = ({ children, onPress, variant = 'primary', style, textStyle, disabled }) => {
   const isDarkMode = useColorScheme() === 'dark'
   const isPrimary = variant === 'primary'
   const isSecondary = variant === 'secondary'
@@ -17,13 +17,15 @@ const AppButton = ({ children, onPress, variant = 'primary', style, textStyle })
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
+      disabled={disabled}
       style={({ pressed }) => [
         styles.button,
         isPrimary && styles.primary,
         isSecondary && styles.secondary,
         isSecondary && (isDarkMode ? styles.secondaryDark : styles.secondaryLight),
         isGhost && styles.ghost,
-        pressed && styles.pressed,
+        pressed && !disabled && styles.pressed,
+        disabled && styles.disabled,
         style,
       ]}>
       <Text style={[
@@ -65,6 +67,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 0,
     minHeight: 48,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   pressed: {
     opacity: 0.7,
