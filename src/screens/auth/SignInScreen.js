@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../components';
 import ROUTES from '../../utils/routes';
-import COLORS from '../../theme/colors';
 import { loginSchema } from '../../utils/authValidator';
+import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
 
 const SignInScreen = ({ navigation }) => {
+    const { colors } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
+    const linkTextTheme = { color: colors.primary };
 
     const handleLogin = () => {
         // Clear previous errors
@@ -40,7 +43,7 @@ const SignInScreen = ({ navigation }) => {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={styles.inner}>
 
-                        <AppLogo size={80} containerStyle={{ alignSelf: 'center' }} />
+                        <AppLogo size={80} containerStyle={styles.logo} />
 
                         {/* Header */}
                         <View style={styles.header}>
@@ -81,7 +84,7 @@ const SignInScreen = ({ navigation }) => {
                                 onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
                                 style={styles.forgotPasswordContainer}
                             >
-                                <AppText style={styles.forgotPasswordText}>
+                                <AppText style={[styles.forgotPasswordText, linkTextTheme]}>
                                     Forgot password?
                                 </AppText>
                             </Pressable>
@@ -100,7 +103,7 @@ const SignInScreen = ({ navigation }) => {
                                 style={styles.footerLinkContainer}
                             >
                                 <AppText muted>
-                                    Don't have an account? <AppText style={styles.footerLinkText}>Sign up</AppText>
+                                    Don't have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Sign up</AppText>
                                 </AppText>
                             </Pressable>
                         </View>
@@ -120,45 +123,44 @@ const styles = StyleSheet.create({
     },
     inner: {
         flex: 1,
-        paddingHorizontal: 24,
-        justifyContent: 'center',
-        backgroundColor: 'cyan'
+        paddingHorizontal: s(24),
+        paddingTop: vs(60),
     },
     header: {
-        marginBottom: 40,
-        marginTop: 20,
-        backgroundColor: 'red'
+        marginBottom: vs(40),
+        marginTop: vs(20),
+    },
+    logo: {
+        alignSelf: 'center',
     },
     title: {
-        fontSize: 36,
-        lineHeight: 44,
+        fontSize: Fonts.size.title,
+        lineHeight: lineHeight(36, 1.22),
     },
     subtitle: {
-        fontSize: 16,
-        marginTop: 8,
+        fontSize: Fonts.size.body,
+        marginTop: vs(8),
     },
     form: {
-        marginBottom: 32,
+        marginBottom: vs(32),
     },
     forgotPasswordContainer: {
         alignSelf: 'flex-end',
-        marginTop: 4,
-        paddingVertical: 8,
+        marginTop: vs(4),
+        paddingVertical: vs(8),
     },
     forgotPasswordText: {
-        color: COLORS.primary,
-        fontWeight: '600',
-        fontSize: 14,
+        fontWeight: Fonts.weight.semiBold,
+        fontSize: Fonts.size.bodySmall,
     },
     actions: {
-        gap: 24,
+        gap: vs(24),
     },
     footerLinkContainer: {
         alignItems: 'center',
-        paddingVertical: 12,
+        paddingVertical: vs(12),
     },
     footerLinkText: {
-        color: COLORS.primary,
-        fontWeight: '700',
+        fontWeight: Fonts.weight.bold,
     },
 });

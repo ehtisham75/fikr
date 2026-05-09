@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Platform, StyleSheet, Text, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -8,9 +8,12 @@ import Animated, {
     Easing,
     cancelAnimation,
 } from 'react-native-reanimated';
-import COLORS from '../theme/colors';
+import { Radius, icon, s, vs } from '../theme/sizeMatter';
 
-const AppLogo2 = ({ size }) => {
+const AppLogo2 = ({ size = 130 }) => {
+    const logoSize = icon(size);
+    const curveWidth = logoSize * 0.38;
+    const curveHeight = logoSize * 0.3;
     // Animation values
     const logoScale = useSharedValue(0);
     const logoRotate = useSharedValue(0);
@@ -22,6 +25,7 @@ const AppLogo2 = ({ size }) => {
             cancelAnimation(logoScale);
             cancelAnimation(logoRotate);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const startAnimations = () => {
@@ -57,10 +61,30 @@ const AppLogo2 = ({ size }) => {
 
     return (
         <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-            <View style={styles.logoInner}>
+            <View style={[
+                styles.logoInner,
+                {
+                    width: logoSize,
+                    height: logoSize,
+                    borderRadius: logoSize * 0.27,
+                },
+            ]}>
                 {/* Dollar/Coffee cup icon using pure shapes */}
-                <View style={styles.logoIcon}>
-                    <View style={styles.logoCurve}>
+                <View style={[
+                    styles.logoIcon,
+                    {
+                        width: logoSize * 0.54,
+                        height: logoSize * 0.54,
+                    },
+                ]}>
+                    <View style={[
+                        styles.logoCurve,
+                        {
+                            width: curveWidth,
+                            height: curveHeight,
+                            borderRadius: curveHeight / 2,
+                        },
+                    ]}>
                         <View style={styles.logoDot} />
                     </View>
                 </View>
@@ -78,18 +102,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     logoInner: {
-        width: 130,
-        height: 130,
         backgroundColor: '#FFFFFF',
-        borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
+                shadowOffset: { width: 0, height: vs(10) },
                 shadowOpacity: 0.2,
-                shadowRadius: 25,
+                shadowRadius: s(25),
             },
             android: {
                 elevation: 12,
@@ -97,28 +118,23 @@ const styles = StyleSheet.create({
         }),
     },
     logoIcon: {
-        width: 70,
-        height: 70,
         justifyContent: 'center',
         alignItems: 'center',
     },
     logoCurve: {
-        width: 50,
-        height: 40,
-        borderWidth: 4,
+        borderWidth: s(4),
         borderColor: '#A78BFA',
         borderBottomWidth: 0,
-        borderRadius: 20,
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
     },
     logoDot: {
         position: 'absolute',
-        bottom: -8,
-        left: 18,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+        bottom: -vs(8),
+        left: s(18),
+        width: icon(8),
+        height: icon(8),
+        borderRadius: Radius.xs,
         backgroundColor: '#A78BFA',
     },
 })

@@ -1,26 +1,34 @@
 import React from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
-import COLORS from '../theme/colors';
+import { icon, s, vs } from '../theme/sizeMatter';
 
 const AppLogo = ({ size = 130, containerStyle = {} }) => {
-    const iconSize = size * 0.55;
+    const { colors } = useTheme();
+    const scaledSize = icon(size);
+    const iconSize = scaledSize * 0.55;
+    const logoTheme = {
+        backgroundColor: colors.white,
+        shadowColor: colors.shadow,
+    };
 
     return (
         <View style={[
             styles.logoInner,
+            logoTheme,
             {
-                width: size,
-                height: size,
-                borderRadius: size * 0.25
+                width: scaledSize,
+                height: scaledSize,
+                borderRadius: scaledSize * 0.25
             },
             containerStyle
         ]}>
             <Svg width={iconSize} height={iconSize} viewBox="0 0 100 100" fill="none">
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="100" y2="100">
-                        <Stop offset="0" stopColor={COLORS.primary} stopOpacity="1" />
-                        <Stop offset="1" stopColor="#7C3AED" stopOpacity="1" />
+                        <Stop offset="0" stopColor={colors.primary} stopOpacity="1" />
+                        <Stop offset="1" stopColor={colors.primaryDark} stopOpacity="1" />
                     </LinearGradient>
                 </Defs>
                 {/* Sleek F monogram */}
@@ -29,7 +37,7 @@ const AppLogo = ({ size = 130, containerStyle = {} }) => {
                     fill="url(#grad)"
                 />
                 {/* Ascent/Mindfulness dot */}
-                <Circle cx="70" cy="80" r="10" fill="#F59E0B" />
+                <Circle cx="70" cy="80" r="10" fill={colors.accentWarm} />
             </Svg>
         </View>
     );
@@ -39,15 +47,13 @@ export default AppLogo;
 
 const styles = StyleSheet.create({
     logoInner: {
-        backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
+                shadowOffset: { width: 0, height: vs(10) },
                 shadowOpacity: 0.2,
-                shadowRadius: 25,
+                shadowRadius: s(25),
             },
             android: {
                 elevation: 4,

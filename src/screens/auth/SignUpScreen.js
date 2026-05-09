@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
-import { AppContainer, AppText, AppTextInput, AppButton } from '../../components';
+import { useTheme } from '@react-navigation/native';
+import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../components';
 import ROUTES from '../../utils/routes';
-import COLORS from '../../theme/colors';
 import { signupSchema } from '../../utils/authValidator';
+import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
 
 const SignUpScreen = ({ navigation }) => {
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const linkTextTheme = { color: colors.primary };
 
   const handleSignup = () => {
     // Clear previous errors
@@ -40,6 +43,8 @@ const SignUpScreen = ({ navigation }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
+
+            <AppLogo size={80} containerStyle={styles.logo} />
 
             {/* Header */}
             <View style={styles.header}>
@@ -102,7 +107,7 @@ const SignUpScreen = ({ navigation }) => {
                 style={styles.footerLinkContainer}
               >
                 <AppText muted>
-                  Already have an account? <AppText style={styles.footerLinkText}>Log in</AppText>
+                  Already have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Log in</AppText>
                 </AppText>
               </Pressable>
             </View>
@@ -126,33 +131,36 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
+    paddingHorizontal: s(24),
+    paddingTop: vs(60),
+    // justifyContent: 'center',
+  },
+  logo: {
+    alignSelf: 'center',
   },
   header: {
-    marginBottom: 40,
-    marginTop: 20,
+    marginBottom: vs(40),
+    marginTop: vs(20),
   },
   title: {
-    fontSize: 36,
-    lineHeight: 44,
+    fontSize: Fonts.size.title,
+    lineHeight: lineHeight(36, 1.22),
   },
   subtitle: {
-    fontSize: 16,
-    marginTop: 8,
+    fontSize: Fonts.size.body,
+    marginTop: vs(8),
   },
   form: {
-    marginBottom: 32,
+    marginBottom: vs(32),
   },
   actions: {
-    gap: 24,
+    gap: vs(24),
   },
   footerLinkContainer: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: vs(12),
   },
   footerLinkText: {
-    color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: Fonts.weight.bold,
   },
 });

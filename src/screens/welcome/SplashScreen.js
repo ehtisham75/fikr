@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  Dimensions,
   Platform,
   Text,
 } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,13 +15,12 @@ import Animated, {
   cancelAnimation,
   runOnJS,
 } from 'react-native-reanimated';
-import COLORS from '../../theme/colors';
 import ROUTES from '../../utils/routes';
 import { AppLogo } from '../../components';
-
-const { width, height } = Dimensions.get('window');
+import { Fonts, SCREEN_HEIGHT, SCREEN_WIDTH, lineHeight, s, vs } from '../../theme/sizeMatter';
 
 const SplashScreen = ({ navigation }) => {
+  const { colors } = useTheme();
   // Animation values
   const logoScale = useSharedValue(0);
   const logoRotate = useSharedValue(0);
@@ -43,6 +42,7 @@ const SplashScreen = ({ navigation }) => {
       cancelAnimation(textTranslateY);
       cancelAnimation(bgOpacity);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startAnimations = () => {
@@ -120,9 +120,13 @@ const SplashScreen = ({ navigation }) => {
   const bgAnimatedStyle = useAnimatedStyle(() => ({
     opacity: bgOpacity.value,
   }));
+  const containerTheme = { backgroundColor: colors.primary };
+  const brandTextTheme = { color: colors.onPrimary };
+  const dividerTheme = { backgroundColor: colors.onPrimarySubtle };
+  const taglineTheme = { color: colors.onPrimaryMuted };
 
   return (
-    <Animated.View style={[styles.container, bgAnimatedStyle]}>
+    <Animated.View style={[styles.container, containerTheme, bgAnimatedStyle]}>
       {/* Background decoration */}
       <View style={styles.decorationTop} />
       <View style={styles.decorationBottom} />
@@ -138,9 +142,9 @@ const SplashScreen = ({ navigation }) => {
 
       {/* Text */}
       <Animated.View style={[styles.textContainer, textAnimatedStyle]}>
-        <Text style={styles.brandName}>Fikr</Text>
-        <View style={styles.divider} />
-        <Text style={styles.tagline}>mindful spending</Text>
+        <Text style={[styles.brandName, brandTextTheme]}>Fikr</Text>
+        <View style={[styles.divider, dividerTheme]} />
+        <Text style={[styles.tagline, taglineTheme]}>mindful spending</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -151,38 +155,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
   },
   decorationTop: {
     position: 'absolute',
-    top: -height * 0.2,
-    left: -width * 0.3,
-    width: width * 0.7,
-    height: width * 0.7,
-    borderRadius: width * 0.35,
+    top: -SCREEN_HEIGHT * 0.2,
+    left: -SCREEN_WIDTH * 0.3,
+    width: SCREEN_WIDTH * 0.7,
+    height: SCREEN_WIDTH * 0.7,
+    borderRadius: SCREEN_WIDTH * 0.35,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   decorationBottom: {
     position: 'absolute',
-    bottom: -height * 0.15,
-    right: -width * 0.2,
-    width: width * 0.6,
-    height: width * 0.6,
-    borderRadius: width * 0.3,
+    bottom: -SCREEN_HEIGHT * 0.15,
+    right: -SCREEN_WIDTH * 0.2,
+    width: SCREEN_WIDTH * 0.6,
+    height: SCREEN_WIDTH * 0.6,
+    borderRadius: SCREEN_WIDTH * 0.3,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   rippleCircle: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: s(120),
+    height: s(120),
+    borderRadius: s(60),
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   rippleCircle2: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: s(120),
+    height: s(120),
+    borderRadius: s(60),
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     transform: [{ scale: 0.8 }],
   },
@@ -191,26 +194,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textContainer: {
-    marginTop: 40,
+    marginTop: vs(40),
     alignItems: 'center',
   },
   brandName: {
-    fontSize: 44,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: Fonts.size.display,
+    lineHeight: lineHeight(44, 1.18),
+    fontWeight: Fonts.weight.bold,
     letterSpacing: 2,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
   },
   divider: {
-    width: 40,
-    height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    marginVertical: 12,
+    width: s(40),
+    height: vs(2),
+    marginVertical: vs(12),
   },
   tagline: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontWeight: '500',
+    fontSize: Fonts.size.bodySmall,
+    lineHeight: lineHeight(14),
+    fontWeight: Fonts.weight.medium,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },

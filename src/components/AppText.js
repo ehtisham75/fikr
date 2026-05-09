@@ -1,18 +1,18 @@
 import React from 'react'
-import { StyleSheet, Text, useColorScheme } from 'react-native'
-import COLORS from '../theme/colors'
+import { StyleSheet, Text } from 'react-native'
+import { useTheme } from '@react-navigation/native'
+import { Typography } from '../theme/sizeMatter'
 
 const AppText = ({ children, muted = false, style, variant = 'body' }) => {
-  const isDarkMode = useColorScheme() === 'dark'
+  const { colors } = useTheme()
 
   return (
     <Text
       style={[
         styles.base,
         styles[variant],
+        { color: muted ? colors.textSecondary : colors.text },
         muted && styles.muted,
-        isDarkMode ? styles.textDark : styles.textLight,
-        muted && (isDarkMode ? styles.mutedDark : styles.mutedLight),
         style,
       ]}>
       {children}
@@ -24,39 +24,12 @@ const styles = StyleSheet.create({
   base: {
     letterSpacing: 0,
   },
-  eyebrow: {
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  title: {
-    fontSize: 44,
-    fontWeight: '800',
-    lineHeight: 52,
-  },
-  heading: {
-    fontSize: 30,
-    fontWeight: '800',
-    lineHeight: 38,
-  },
-  body: {
-    fontSize: 17,
-    lineHeight: 25,
-  },
+  eyebrow: Typography.eyebrow,
+  title: Typography.title,
+  heading: Typography.heading,
+  body: Typography.body,
   muted: {
     fontWeight: '500',
-  },
-  textLight: {
-    color: COLORS.text.black2,
-  },
-  textDark: {
-    color: COLORS.text.white,
-  },
-  mutedLight: {
-    color: COLORS.text.gray,
-  },
-  mutedDark: {
-    color: COLORS.text.gray,
   },
 })
 
