@@ -3,12 +3,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useColorScheme,
 } from 'react-native'
-import COLORS from '../theme/colors'
+import { Fonts, Radius, s, vs } from '../theme/sizeMatter'
+import { useTheme } from '@react-navigation/native'
 
 const AppButton = ({ children, onPress, variant = 'primary', style, textStyle, disabled }) => {
-  const isDarkMode = useColorScheme() === 'dark'
+  const { colors } = useTheme()
   const isPrimary = variant === 'primary'
   const isSecondary = variant === 'secondary'
   const isGhost = variant === 'ghost'
@@ -20,9 +20,9 @@ const AppButton = ({ children, onPress, variant = 'primary', style, textStyle, d
       disabled={disabled}
       style={({ pressed }) => [
         styles.button,
-        isPrimary && styles.primary,
+        isPrimary && { backgroundColor: colors.primary },
         isSecondary && styles.secondary,
-        isSecondary && (isDarkMode ? styles.secondaryDark : styles.secondaryLight),
+        isSecondary && { borderColor: colors.border },
         isGhost && styles.ghost,
         pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
@@ -30,9 +30,10 @@ const AppButton = ({ children, onPress, variant = 'primary', style, textStyle, d
       ]}>
       <Text style={[
         styles.label,
-        isPrimary && styles.primaryLabel,
-        isSecondary && styles.secondaryLabel,
+        isPrimary && { color: colors.white },
+        isSecondary && { color: colors.primary },
         isGhost && styles.ghostLabel,
+        isGhost && { color: colors.textSecondary },
         textStyle
       ]}>
         {children}
@@ -43,30 +44,21 @@ const AppButton = ({ children, onPress, variant = 'primary', style, textStyle, d
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52,
-    borderRadius: 14,
+    height: vs(38),
+    borderRadius: Radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: s(18),
     flexDirection: 'row',
-  },
-  primary: {
-    backgroundColor: COLORS.primary,
   },
   secondary: {
     borderWidth: 1.5,
     backgroundColor: 'transparent',
   },
-  secondaryLight: {
-    borderColor: COLORS.border.lightGray,
-  },
-  secondaryDark: {
-    borderColor: COLORS.border.gray,
-  },
   ghost: {
     backgroundColor: 'transparent',
     borderWidth: 0,
-    minHeight: 48,
+    height: vs(30),
   },
   disabled: {
     opacity: 0.5,
@@ -76,19 +68,12 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   label: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: Fonts.size.body,
+    fontWeight: Fonts.weight.bold,
     letterSpacing: 0.5,
   },
-  primaryLabel: {
-    color: COLORS.text.white,
-  },
-  secondaryLabel: {
-    color: COLORS.primary,
-  },
   ghostLabel: {
-    color: '#9CA3AF',
-    fontWeight: '600',
+    fontWeight: Fonts.weight.semiBold,
   },
 })
 

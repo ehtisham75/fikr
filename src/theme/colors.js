@@ -1,7 +1,9 @@
 const sharedColors = {
     primary: '#A78BFA',
+    primaryDark: '#7C3AED',
     secondary: '#1c1c1e',
     accent: '#ff4081',
+    accentWarm: '#F59E0B',
     error: '#ff0000',
     warning: '#ffa500',
     success: '#4caf50',
@@ -14,6 +16,9 @@ const sharedColors = {
     },
     bg: '#A78BFA',
     shadow: '#7C3AED',
+    onPrimary: '#ffffff',
+    onPrimaryMuted: 'rgba(255, 255, 255, 0.85)',
+    onPrimarySubtle: 'rgba(255, 255, 255, 0.4)',
     white: '#ffffff',
     black: '#000000',
     black40: 'rgba(17, 17, 17, .4)',
@@ -28,6 +33,9 @@ export const LightThemeColors = {
     text: '#111827',
     textSecondary: '#6B7280',
     border: '#E5E7EB',
+    cardBorder: 'rgba(0,0,0,0.03)',
+    inputBackground: '#F9FAFB',
+    logoBackground: '#ffffff',
 };
 
 export const DarkThemeColors = {
@@ -37,21 +45,7 @@ export const DarkThemeColors = {
     text: '#ffffff',
     textSecondary: '#9ca3af',
     border: '#374151',
+    cardBorder: 'rgba(255,255,255,0.05)',
+    inputBackground: '#1F2937',
+    logoBackground: '#ffffff',
 };
-
-// Kept for backward compatibility
-const COLORS = {
-    ...sharedColors,
-    text: {
-        black: '#111827',
-        black2: '#333333',
-        gray: '#6B7280',
-        white: '#ffffff',
-    },
-    border: {
-        gray: '#374151',
-        lightGray: '#E5E7EB',
-    },
-};
-
-export default COLORS;
