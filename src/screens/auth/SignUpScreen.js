@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
-import { AppScreen, AppText, AppTextInput, AppButton } from '../../components';
+import { AppContainer, AppText, AppTextInput, AppButton } from '../../components';
 import ROUTES from '../../utils/routes';
 import COLORS from '../../theme/colors';
 import { signupSchema } from '../../utils/authValidator';
@@ -33,7 +33,7 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   return (
-    <AppScreen contentStyle={styles.screen}>
+    <AppContainer contentStyle={styles.screen}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -110,7 +110,7 @@ const SignUpScreen = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </AppScreen>
+    </AppContainer>
   );
 };
 

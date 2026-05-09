@@ -7,7 +7,7 @@ import Animated, {
   withDelay,
   Easing,
 } from 'react-native-reanimated';
-import { AppButton, AppScreen, AppText } from '../../components';
+import { AppButton, AppContainer, AppText } from '../../components';
 import COLORS from '../../theme/colors';
 import ROUTES from '../../utils/routes';
 
@@ -50,7 +50,7 @@ const WelcomeScreen = ({ navigation }) => {
   }));
 
   return (
-    <AppScreen contentStyle={styles.screen}>
+    <AppContainer safeArea={false}>
       <View style={styles.graphicContainer}>
         {/* Minimal Animated Graphic Background */}
         <Animated.View style={[styles.graphicCircle, contentAnimatedStyle]} />
@@ -87,7 +87,7 @@ const WelcomeScreen = ({ navigation }) => {
           </AppButton>
         </Animated.View>
       </View>
-    </AppScreen>
+    </AppContainer>
   );
 };
 
@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'flex-start',
-    paddingHorizontal: 0,
-    paddingTop: 0,
+    // paddingHorizontal: 0,
+    // paddingTop: 0,
   },
   graphicContainer: {
     height: height * 0.45,

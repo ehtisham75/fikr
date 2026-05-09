@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, FlatList, Pressable, Platform, useColorScheme } from 'react-native';
 import { Settings, Plus, Lock } from 'lucide-react-native';
-import { AppScreen, AppText } from '../../components';
+import { AppContainer, AppText } from '../../components';
 import COLORS from '../../theme/colors';
 import { getFolders } from '../../utils/storage';
 
@@ -9,8 +9,8 @@ const FolderCard = ({ item, onPress }) => {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <Pressable 
-      onPress={onPress} 
+    <Pressable
+      onPress={onPress}
       style={({ pressed }) => [
         styles.card,
         isDarkMode ? styles.cardDark : styles.cardLight,
@@ -37,7 +37,7 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <AppScreen contentStyle={styles.screen}>
+    <AppContainer contentStyle={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
         <AppText variant="title" style={styles.headerTitle}>Fikr</AppText>
@@ -51,9 +51,9 @@ const HomeScreen = ({ navigation }) => {
         data={folders}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <FolderCard 
-            item={item} 
-            onPress={() => console.log('Opened folder:', item.name)} 
+          <FolderCard
+            item={item}
+            onPress={() => console.log('Opened folder:', item.name)}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -61,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
       />
 
       {/* Floating Action Button */}
-      <Pressable 
+      <Pressable
         style={({ pressed }) => [
           styles.fab,
           pressed && styles.fabPressed,
@@ -70,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
       >
         <Plus size={32} color={COLORS.text.white} />
       </Pressable>
-    </AppScreen>
+    </AppContainer>
   );
 };
 

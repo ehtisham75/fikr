@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
-import { AppScreen, AppText, AppTextInput, AppButton } from '../../components';
+import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../components';
 import ROUTES from '../../utils/routes';
 import COLORS from '../../theme/colors';
 import { loginSchema } from '../../utils/authValidator';
@@ -32,13 +32,15 @@ const SignInScreen = ({ navigation }) => {
     };
 
     return (
-        <AppScreen contentStyle={styles.screen}>
+        <AppContainer>
             <KeyboardAvoidingView
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={styles.inner}>
+
+                        <AppLogo size={80} containerStyle={{ alignSelf: 'center' }} />
 
                         {/* Header */}
                         <View style={styles.header}>
@@ -106,17 +108,13 @@ const SignInScreen = ({ navigation }) => {
                     </View>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
-        </AppScreen>
+        </AppContainer>
     );
 };
 
 export default SignInScreen;
 
 const styles = StyleSheet.create({
-    screen: {
-        paddingHorizontal: 0,
-        paddingTop: 0,
-    },
     container: {
         flex: 1,
     },
@@ -124,10 +122,12 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 24,
         justifyContent: 'center',
+        backgroundColor: 'cyan'
     },
     header: {
         marginBottom: 40,
         marginTop: 20,
+        backgroundColor: 'red'
     },
     title: {
         fontSize: 36,

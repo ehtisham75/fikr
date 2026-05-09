@@ -10,15 +10,14 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withRepeat,
   withSequence,
   Easing,
   cancelAnimation,
-  interpolate,
   runOnJS,
 } from 'react-native-reanimated';
 import COLORS from '../../theme/colors';
 import ROUTES from '../../utils/routes';
+import { AppLogo } from '../../components';
 
 const { width, height } = Dimensions.get('window');
 
@@ -134,14 +133,7 @@ const SplashScreen = ({ navigation }) => {
 
       {/* Logo */}
       <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-        <View style={styles.logoInner}>
-          {/* Dollar/Coffee cup icon using pure shapes */}
-          <View style={styles.logoIcon}>
-            <View style={styles.logoCurve}>
-              <View style={styles.logoDot} />
-            </View>
-          </View>
-        </View>
+        <AppLogo size={130} />
       </Animated.View>
 
       {/* Text */}
@@ -197,50 +189,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoInner: {
-    width: 130,
-    height: 130,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.2,
-        shadowRadius: 25,
-      },
-      android: {
-        elevation: 12,
-      },
-    }),
-  },
-  logoIcon: {
-    width: 70,
-    height: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoCurve: {
-    width: 50,
-    height: 40,
-    borderWidth: 4,
-    borderColor: '#A78BFA',
-    borderBottomWidth: 0,
-    borderRadius: 20,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  logoDot: {
-    position: 'absolute',
-    bottom: -8,
-    left: 18,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#A78BFA',
   },
   textContainer: {
     marginTop: 40,
