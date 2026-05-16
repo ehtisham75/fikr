@@ -15,3 +15,22 @@ jest.mock('react-native-mmkv', () => {
     createMMKV: jest.fn(createMockStorage),
   };
 });
+
+jest.mock('./src/lib/supabase', () => {
+  const query = {
+    select: jest.fn(() => query),
+    eq: jest.fn(() => query),
+    order: jest.fn(() => Promise.resolve({ data: [], error: null })),
+    insert: jest.fn(() => query),
+    single: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  };
+
+  return {
+    supabase: {
+      auth: {
+        getUser: jest.fn(() => Promise.resolve({ data: { user: null } })),
+      },
+      from: jest.fn(() => query),
+    },
+  };
+});
