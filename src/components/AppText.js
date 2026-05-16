@@ -3,11 +3,12 @@ import { StyleSheet, Text } from 'react-native'
 import { useTheme } from '@react-navigation/native'
 import { Typography } from '../theme/sizeMatter'
 
-const AppText = ({ children, muted = false, style, variant = 'body' }) => {
+const AppText = ({ children, muted = false, style, variant = 'body', ...props }) => {
   const { colors } = useTheme()
 
   return (
     <Text
+      {...props}
       style={[
         styles.base,
         styles[variant],
