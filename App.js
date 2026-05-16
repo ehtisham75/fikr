@@ -9,10 +9,10 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <PaperProvider>
+        <PaperProvider>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <RootNavigator />
-        {/* <GlobalSnackbar /> */}
+        <GlobalSnackbar />
       </PaperProvider>
     </SafeAreaProvider>
   );
