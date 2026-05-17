@@ -7,6 +7,9 @@ import SignUpScreen from '../screens/auth/SignUpScreen'
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'
 import ROUTES from '../utils/routes'
 import BottomTabNavigation from './BottomTabNavigation'
+import AddNewFolderScreen from '../screens/home/AddNewFolderScreen'
+import AddNewTaskScreen from '../screens/home/AddNewTaskScreen'
+import TodayTasksScreen from '../screens/home/TodayTasksScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -24,6 +27,9 @@ const MainStack = () => {
       <Stack.Screen name={ROUTES.SIGN_UP} component={SignUpScreen} />
       <Stack.Screen name={ROUTES.FORGOT_PASSWORD} component={ForgotPasswordScreen} />
       <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigation} />
+      <Stack.Screen name={ROUTES.ADD_NEW_FOLDER} component={AddNewFolderScreen} />
+      <Stack.Screen name={ROUTES.ADD_NEW_TASK} component={AddNewTaskScreen} />
+      <Stack.Screen name={ROUTES.TODAY_TASKS} component={TodayTasksScreen} />
     </Stack.Navigator>
   )
 }

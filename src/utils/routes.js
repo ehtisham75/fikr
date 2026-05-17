@@ -12,6 +12,9 @@ const ROUTES = {
     BUDGET: 'Budget',
     SETTINGS: 'Settings',
     PROFILE: 'Profile',
+    ADD_NEW_FOLDER: 'AddNewFolder',
+    ADD_NEW_TASK: 'AddNewTask',
+    TODAY_TASKS: 'TodayTasks',
     // 
     NOTIFICATIONS: 'Notifications',
     HELP: 'Help',

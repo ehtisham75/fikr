@@ -10,6 +10,7 @@ const AppTextInput = ({
   secureTextEntry,
   style,
   containerStyle,
+  inputContainerStyle,
   error,
   ...props
 }) => {
@@ -34,6 +35,7 @@ const AppTextInput = ({
         style={[
           styles.inputContainer,
           inputContainerTheme,
+          inputContainerStyle,
           isFocused && { borderColor: colors.primary },
           error && { borderColor: colors.error },
         ]}>
