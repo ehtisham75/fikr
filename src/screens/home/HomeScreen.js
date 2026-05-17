@@ -46,7 +46,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const navigateToTodayTasks = () => {
-    navigation.navigate(ROUTES.TODAY_TASKS);
+    navigation.navigate(ROUTES.TASKS);
   };
 
   const listHeader = (

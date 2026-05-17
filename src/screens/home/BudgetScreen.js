@@ -20,7 +20,6 @@ import {
 import { supabase } from '../../lib/supabase';
 import {
     BUDGETS_SELECT_COLUMNS,
-    CREATE_BUDGETS_TABLE_SQL,
     SUPABASE_TABLES,
     isMissingSupabaseTableError,
     isSupabasePolicyError,
@@ -225,7 +224,6 @@ const BudgetScreen = () => {
                     'Budget permission blocked',
                     'Run the budgets RLS policy SQL in Supabase SQL Editor.',
                 );
-                console.log('Budgets table policy SQL:', CREATE_BUDGETS_TABLE_SQL);
                 return;
             }
 
@@ -292,7 +290,6 @@ const BudgetScreen = () => {
                     'Create budgets table',
                     'Run the budgets table SQL once in Supabase SQL Editor.',
                 );
-                console.log('Create budgets table SQL:', CREATE_BUDGETS_TABLE_SQL);
                 return;
             }
 
@@ -302,7 +299,6 @@ const BudgetScreen = () => {
                     'Budget permission blocked',
                     'Run the budgets RLS policy SQL in Supabase SQL Editor.',
                 );
-                console.log('Budgets table policy SQL:', CREATE_BUDGETS_TABLE_SQL);
                 return;
             }
 

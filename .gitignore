@@ -81,4 +81,4 @@ ios/tmp.xcconfig
 
 .env
 integrate-lock.json
-
+src/lib/tableQueriesForSQLEditor.sql
