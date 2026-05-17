@@ -1,20 +1,37 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import BottomTabNavigation from './BottomTabNavigation'
+import ROUTES from '../utils/routes'
 import SplashScreen from '../screens/welcome/SplashScreen'
-import HomeScreen from '../screens/home/HomeScreen'
+import WelcomeScreen from '../screens/welcome/WelcomeScreen'
+import SignInScreen from '../screens/auth/SignInScreen'
+import SignUpScreen from '../screens/auth/SignUpScreen'
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'
+import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen'
+import SetNewPasswordScreen from '../screens/auth/SetNewPasswordScreen'
+import AddNewFolderScreen from '../screens/home/AddNewFolderScreen'
+import AddNewTaskScreen from '../screens/home/AddNewTaskScreen'
 
 const Stack = createNativeStackNavigator()
 
 const MainStack = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName={ROUTES.SPLASH}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: 'transparent' },
       }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name={ROUTES.SPLASH} component={SplashScreen} />
+      <Stack.Screen name={ROUTES.WELCOME} component={WelcomeScreen} />
+      <Stack.Screen name={ROUTES.SIGN_IN} component={SignInScreen} />
+      <Stack.Screen name={ROUTES.SIGN_UP} component={SignUpScreen} />
+      <Stack.Screen name={ROUTES.FORGOT_PASSWORD} component={ForgotPasswordScreen} />
+      <Stack.Screen name={ROUTES.OTP_VERIFICATION} component={OTPVerificationScreen} />
+      <Stack.Screen name={ROUTES.SET_NEW_PASSWORD} component={SetNewPasswordScreen} />
+      <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigation} />
+      <Stack.Screen name={ROUTES.ADD_NEW_FOLDER} component={AddNewFolderScreen} />
+      <Stack.Screen name={ROUTES.ADD_NEW_TASK} component={AddNewTaskScreen} />
     </Stack.Navigator>
   )
 }

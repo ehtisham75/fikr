@@ -1,0 +1,51 @@
+const sharedColors = {
+    primary: '#A78BFA',
+    primaryDark: '#7C3AED',
+    secondary: '#1c1c1e',
+    accent: '#ff4081',
+    accentWarm: '#F59E0B',
+    error: '#ff0000',
+    warning: '#ffa500',
+    success: '#4caf50',
+    transparent: 'transparent',
+    purple: {
+        purple1: '#A78BFA',
+        purple2: '#8688eeff',
+        purple3: '#6366F1',
+        purple4: '#8b5cf6',
+    },
+    bg: '#A78BFA',
+    shadow: '#7C3AED',
+    onPrimary: '#ffffff',
+    onPrimaryMuted: 'rgba(255, 255, 255, 0.85)',
+    onPrimarySubtle: 'rgba(255, 255, 255, 0.4)',
+    white: '#ffffff',
+    black: '#000000',
+    black40: 'rgba(17, 17, 17, .4)',
+    black60: 'rgba(17, 17, 17, .6)',
+    black80: 'rgba(17, 17, 17, .8)',
+};
+
+export const LightThemeColors = {
+    ...sharedColors,
+    background: '#ffffff',
+    card: '#ffffff',
+    text: '#111827',
+    textSecondary: '#6B7280',
+    border: '#E5E7EB',
+    cardBorder: 'rgba(0,0,0,0.03)',
+    inputBackground: '#F9FAFB',
+    logoBackground: '#ffffff',
+};
+
+export const DarkThemeColors = {
+    ...sharedColors,
+    background: '#000000',
+    card: '#1c1c1e',
+    text: '#ffffff',
+    textSecondary: '#9ca3af',
+    border: '#374151',
+    cardBorder: 'rgba(255,255,255,0.05)',
+    inputBackground: '#1F2937',
+    logoBackground: '#ffffff',
+};

@@ -1,0 +1,114 @@
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors
+> Task :gradle-plugin:react-native-gradle-plugin:processResources
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:classes
+> Task :gradle-plugin:react-native-gradle-plugin:jar
+
+> Task :app:externalNativeBuildCleanDebug FAILED
+Clean appmodules-x86
+C/C++: CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:9 (add_subdirectory):
+C/C++:   add_subdirectory given source
+C/C++:   "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-config/android/build/generated/source/codegen/jni/"
+C/C++:   which is not an existing directory.
+C/C++: Call Stack (most recent call first):
+C/C++:   /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:10 (add_subdirectory):
+C/C++:   add_subdirectory given source
+C/C++:   "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/"
+C/C++:   which is not an existing directory.
+C/C++: Call Stack (most recent call first):
+C/C++:   /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:14 (add_subdirectory):
+C/C++:   add_subdirectory given source
+C/C++:   "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/"
+C/C++:   which is not an existing directory.
+C/C++: Call Stack (most recent call first):
+C/C++:   /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:97 (target_link_libraries):
+C/C++:   Cannot specify link libraries for target "react_codegen_RNCConfigSpec"
+C/C++:   which is not built by this project.
+C/C++: Call Stack (most recent call first):
+C/C++:   CMakeLists.txt:31 (include)
+C/C++: ninja: error: rebuilding 'build.ninja': subcommand failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:externalNativeBuildCleanDebug'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/.cxx/Debug/5gw346m5/x86'
+  [0/2] Re-checking globbed directories...
+  [1/2] Re-running CMake...
+  -- Configuring incomplete, errors occurred!
+  See also "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/.cxx/Debug/5gw346m5/x86/CMakeFiles/CMakeOutput.log".
+  See also "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/.cxx/Debug/5gw346m5/x86/CMakeFiles/CMakeError.log".
+  FAILED: build.ninja 
+  /Users/brownboii/Library/Android/sdk/cmake/3.22.1/bin/cmake --regenerate-during-build -S/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup -B/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/.cxx/Debug/5gw346m5/x86
+  
+  C++ build system [clean] failed while executing:
+      /Users/brownboii/Library/Android/sdk/cmake/3.22.1/bin/ninja \
+        -C \
+        /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/.cxx/Debug/5gw346m5/x86 \
+        clean
+    from /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app
+  CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:9 (add_subdirectory):
+    add_subdirectory given source
+    "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-config/android/build/generated/source/codegen/jni/"
+    which is not an existing directory.
+  Call Stack (most recent call first):
+    /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+    CMakeLists.txt:31 (include)
+  
+  
+  CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:10 (add_subdirectory):
+    add_subdirectory given source
+    "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/"
+    which is not an existing directory.
+  Call Stack (most recent call first):
+    /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+    CMakeLists.txt:31 (include)
+  
+  
+  CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/android/app/build/generated/autolinking/src/main/jni/Android-autolinking.cmake:14 (add_subdirectory):
+    add_subdirectory given source
+    "/Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/"
+    which is not an existing directory.
+  Call Stack (most recent call first):
+    /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:94 (include)
+    CMakeLists.txt:31 (include)
+  
+  
+  CMake Error at /Users/brownboii/Desktop/Data/ReactNativeProjects/fikr/node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake:97 (target_link_libraries):
+    Cannot specify link libraries for target "react_codegen_RNCConfigSpec"
+    which is not built by this project.
+  Call Stack (most recent call first):
+    CMakeLists.txt:31 (include)
+  
+  
+  ninja: error: rebuilding 'build.ninja': subcommand failed
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 21s
+11 actionable tasks: 5 executed, 6 up-to-date
