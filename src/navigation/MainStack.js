@@ -7,6 +7,8 @@ import WelcomeScreen from '../screens/welcome/WelcomeScreen'
 import SignInScreen from '../screens/auth/SignInScreen'
 import SignUpScreen from '../screens/auth/SignUpScreen'
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'
+import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen'
+import SetNewPasswordScreen from '../screens/auth/SetNewPasswordScreen'
 import AddNewFolderScreen from '../screens/home/AddNewFolderScreen'
 import AddNewTaskScreen from '../screens/home/AddNewTaskScreen'
 
@@ -25,6 +27,8 @@ const MainStack = () => {
       <Stack.Screen name={ROUTES.SIGN_IN} component={SignInScreen} />
       <Stack.Screen name={ROUTES.SIGN_UP} component={SignUpScreen} />
       <Stack.Screen name={ROUTES.FORGOT_PASSWORD} component={ForgotPasswordScreen} />
+      <Stack.Screen name={ROUTES.OTP_VERIFICATION} component={OTPVerificationScreen} />
+      <Stack.Screen name={ROUTES.SET_NEW_PASSWORD} component={SetNewPasswordScreen} />
       <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigation} />
       <Stack.Screen name={ROUTES.ADD_NEW_FOLDER} component={AddNewFolderScreen} />
       <Stack.Screen name={ROUTES.ADD_NEW_TASK} component={AddNewTaskScreen} />

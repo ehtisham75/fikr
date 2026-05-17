@@ -28,7 +28,15 @@ jest.mock('./src/lib/supabase', () => {
   return {
     supabase: {
       auth: {
+        getSession: jest.fn(() => Promise.resolve({ data: { session: null } })),
         getUser: jest.fn(() => Promise.resolve({ data: { user: null } })),
+        signInWithPassword: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        signUp: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        resetPasswordForEmail: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        verifyOtp: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        resend: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        updateUser: jest.fn(() => Promise.resolve({ data: {}, error: null })),
+        signOut: jest.fn(() => Promise.resolve({ error: null })),
       },
       from: jest.fn(() => query),
     },

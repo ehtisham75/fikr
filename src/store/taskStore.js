@@ -31,6 +31,16 @@ const saveArray = (key, value) => {
   storage.set(key, JSON.stringify(value));
 };
 
+const getCurrentUserId = async () => {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data?.user?.id) {
+    throw error || new Error('Please log in to sync tasks.');
+  }
+
+  return data.user.id;
+};
+
 const sortTasks = tasks => [...tasks].sort((first, second) => {
   const firstTime = `${first.due_date || ''} ${first.due_time || '00:00'}`;
   const secondTime = `${second.due_date || ''} ${second.due_time || '00:00'}`;
@@ -85,6 +95,7 @@ export const useTaskStore = create((set, get) => ({
     get().hydrate();
 
     try {
+      await getCurrentUserId();
       await get().syncPendingTasks();
 
       const { data, error } = await supabase
@@ -117,9 +128,11 @@ export const useTaskStore = create((set, get) => ({
 
   addTask: async values => {
     const now = dayjs().toISOString();
+    const userId = await getCurrentUserId();
     const localId = `local-${Date.now()}`;
     const task = normalizeTask({
       id: localId,
+      user_id: userId,
       title: values.title.trim(),
       notes: values.notes.trim(),
       due_date: values.due_date,
@@ -140,6 +153,7 @@ export const useTaskStore = create((set, get) => ({
     try {
       const payload = {
         title: task.title,
+        user_id: userId,
         notes: task.notes,
         due_date: task.due_date,
         due_time: task.due_time,
@@ -193,11 +207,13 @@ export const useTaskStore = create((set, get) => ({
     try {
       const syncedIds = [];
       const syncedTasks = [];
+      const userId = await getCurrentUserId();
 
       for (const task of pendingTasks) {
         const { data, error } = await supabase
           .from(SUPABASE_TABLES.TASKS)
           .insert({
+            user_id: userId,
             title: task.title,
             notes: task.notes,
             due_date: task.due_date,
