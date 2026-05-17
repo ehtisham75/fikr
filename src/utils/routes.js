@@ -9,6 +9,7 @@ const ROUTES = {
     // bottom tab
     BOTTOM_TAB: 'BottomTab',
     HOME: 'Folders',
+    TASKS: 'Tasks',
     BUDGET: 'Budget',
     SETTINGS: 'Settings',
     PROFILE: 'Profile',

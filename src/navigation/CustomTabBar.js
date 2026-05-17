@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ROUTES from '../utils/routes';
 import { AppIcon } from '../components';
 import { useTheme } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { Fonts, icon } from '../theme/sizeMatter';
 
 const icons = {
     [ROUTES.HOME]: { default: 'List', focused: 'List' },
+    [ROUTES.TASKS]: { default: 'ListTodo', focused: 'ListTodo' },
     [ROUTES.BUDGET]: { default: 'Receipt', focused: 'Receipt' },
     [ROUTES.SETTINGS]: { default: 'Bolt', focused: 'Bolt' },
 };
@@ -15,15 +16,11 @@ export default function CustomTabBar({ state, descriptors, navigation }) {
     const { colors } = useTheme();
 
     return (
-        <View style={[styles.wrapper,
-        Platform.OS === 'ios' && {
-            marginBottom: 20,
-        }]}>
+        <View style={[styles.wrapper, Platform.OS === 'ios' && styles.iosWrapper]}>
             <View style={[styles.container,
             { backgroundColor: colors.card }
             ]}>
                 {state.routes.map((route, index) => {
-                    const { options } = descriptors[route.key];
                     const isFocused = state.index === index;
 
                     const iconName = icons[route.name]?.default;
@@ -62,6 +59,9 @@ export default function CustomTabBar({ state, descriptors, navigation }) {
 
 const styles = StyleSheet.create({
     wrapper: {
+    },
+    iosWrapper: {
+        marginBottom: 20,
     },
     container: {
         flexDirection: 'row',
