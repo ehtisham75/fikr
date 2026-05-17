@@ -1,28 +1,112 @@
-import React from 'react'
-import { Button, H2, Paragraph, Separator, XStack, YStack } from 'tamagui/native'
+import React, { useCallback, useState } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  AppContainer,
+  AppFloatingButton,
+} from '../../components';
+import { getFolders } from '../../utils/storage';
+import ROUTES from '../../utils/routes';
+import { vs } from '../../theme/sizeMatter';
+import { useTaskStore, getNextTodayTask } from '../../store/taskStore';
+import {
+  FolderCard,
+  HomeHeader,
+  TodayTaskCheck,
+} from './components';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
+  const [folders, setFolders] = useState([]);
+  const tasks = useTaskStore(state => state.tasks);
+  const loadTasks = useTaskStore(state => state.loadTasks);
+  const nextTodayTask = getNextTodayTask(tasks);
+
+  const fetchFolders = useCallback(() => {
+    try {
+      const loadedFolders = getFolders();
+      setFolders(loadedFolders);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchFolders();
+      loadTasks();
+    }, [fetchFolders, loadTasks]),
+  );
+
+  const navigateToNewFolder = () => {
+    navigation.navigate(ROUTES.ADD_NEW_FOLDER);
+  };
+
+  const navigateToNewTask = () => {
+    navigation.navigate(ROUTES.ADD_NEW_TASK);
+  };
+
+  const navigateToTodayTasks = () => {
+    navigation.navigate(ROUTES.TASKS);
+  };
+
+  const listHeader = (
+    <>
+      <HomeHeader />
+      <TodayTaskCheck
+        nextTask={nextTodayTask}
+        onAddTask={navigateToNewTask}
+        onOpenTasks={navigateToTodayTasks}
+      />
+    </>
+  );
+
   return (
-    <YStack flex={1} backgroundColor="$background" padding="$5" justifyContent="center" gap="$5">
-      <YStack gap="$2">
-        <H2 color="$color">Home</H2>
-        <Paragraph size="$5" color="$color11">
-          This screen is rendered with Tamagui layout and typography primitives.
-        </Paragraph>
-      </YStack>
+    <AppContainer contentStyle={styles.screen}>
+      <FlatList
+        data={folders}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <FolderCard
+            item={item}
+            onPress={() => console.log('Opened folder:', item.name)}
+          />
+        )}
+        ListHeaderComponent={listHeader}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+      <AppFloatingButton
+        isSubButtons
+        subButtons={[
+          {
+            key: 'folder',
+            label: 'New Folder',
+            icon: 'FolderPlus',
+            onPress: navigateToNewFolder,
+          },
+          {
+            key: 'task',
+            label: 'Add Task',
+            icon: 'ListPlus',
+            onPress: navigateToNewTask,
+          },
+        ]}
+      />
+    </AppContainer>
+  );
+};
 
-      <Separator />
+export default HomeScreen;
 
-      <XStack gap="$3" flexWrap="wrap">
-        <Button size="$4" theme="active">
-          Primary Action
-        </Button>
-        <Button size="$4" variant="outlined">
-          Secondary
-        </Button>
-      </XStack>
-    </YStack>
-  )
-}
-
-export default HomeScreen
+const styles = StyleSheet.create({
+  screen: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  listContent: {
+    paddingHorizontal: 0,
+    paddingBottom: vs(112),
+    gap: vs(16),
+  },
+});
