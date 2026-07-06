@@ -18,6 +18,7 @@ import Animated, {
 import ROUTES from '../../utils/routes';
 import { AppLogo } from '../../components';
 import { Fonts, SCREEN_HEIGHT, SCREEN_WIDTH, lineHeight, s, vs } from '../../theme/sizeMatter';
+import { supabase } from '../../lib/supabase';
 
 const SplashScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -94,8 +95,18 @@ const SplashScreen = ({ navigation }) => {
     // Auto complete
     setTimeout(() => {
       bgOpacity.value = withTiming(0, { duration: 500 });
-      setTimeout(() => {
-        runOnJS(navigation.replace)(ROUTES.WELCOME);
+      setTimeout(async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            runOnJS(navigation.replace)(ROUTES.HOME);
+          } else {
+            runOnJS(navigation.replace)(ROUTES.WELCOME);
+          }
+        } catch (error) {
+          console.log('Splash session check error:', error);
+          runOnJS(navigation.replace)(ROUTES.WELCOME);
+        }
       }, 500);
     }, 2800);
   };

@@ -5,15 +5,18 @@ import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../c
 import ROUTES from '../../utils/routes';
 import { loginSchema } from '../../utils/authValidator';
 import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
+import { supabase } from '../../lib/supabase';
+import { showToast } from '../../utils/helper';
 
 const SignInScreen = ({ navigation }) => {
     const { colors } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const linkTextTheme = { color: colors.primary };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         // Clear previous errors
         setErrors({});
 
@@ -30,8 +33,28 @@ const SignInScreen = ({ navigation }) => {
             return;
         }
 
-        // Supabase login logic will go here
-        console.log('Login pressed:', email);
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+
+            if (error) {
+                showToast('error', 'Login Failed', error.message);
+            } else {
+                showToast('success', 'Logged In', 'Welcome back!');
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: ROUTES.HOME }],
+                });
+            }
+        } catch (error) {
+            showToast('error', 'Login Error', error.message || 'An unexpected error occurred.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -94,9 +117,9 @@ const SignInScreen = ({ navigation }) => {
                         <View style={styles.actions}>
                             <AppButton
                                 onPress={handleLogin}
-                                disabled={!email || !password}
+                                disabled={!email || !password || loading}
                             >
-                                Log in
+                                {loading ? 'Logging in...' : 'Log in'}
                             </AppButton>
                             <Pressable
                                 onPress={() => navigation.navigate(ROUTES.SIGN_UP)}

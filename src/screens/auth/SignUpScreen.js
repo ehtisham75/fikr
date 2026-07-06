@@ -5,6 +5,8 @@ import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../c
 import ROUTES from '../../utils/routes';
 import { signupSchema } from '../../utils/authValidator';
 import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
+import { supabase } from '../../lib/supabase';
+import { showToast } from '../../utils/helper';
 
 const SignUpScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -12,9 +14,10 @@ const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const linkTextTheme = { color: colors.primary };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     // Clear previous errors
     setErrors({});
 
@@ -31,8 +34,37 @@ const SignUpScreen = ({ navigation }) => {
       return;
     }
 
-    // Supabase signup logic will go here
-    console.log('Signup pressed:', email);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      });
+
+      if (error) {
+        showToast('error', 'Signup Failed', error.message);
+      } else {
+        if (data?.session) {
+          showToast('success', 'Welcome', 'Account created successfully!');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: ROUTES.HOME }],
+          });
+        } else {
+          showToast('success', 'Account Created', 'Check your email for the confirmation link!');
+          navigation.replace(ROUTES.SIGN_IN);
+        }
+      }
+    } catch (error) {
+      showToast('error', 'Signup Error', error.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,9 +130,9 @@ const SignUpScreen = ({ navigation }) => {
             <View style={styles.actions}>
               <AppButton
                 onPress={handleSignup}
-                disabled={!name || !email || !password}
+                disabled={!name || !email || !password || loading}
               >
-                Sign up
+                {loading ? 'Creating Account...' : 'Sign up'}
               </AppButton>
               <Pressable
                 onPress={() => navigation.navigate(ROUTES.SIGN_IN)}

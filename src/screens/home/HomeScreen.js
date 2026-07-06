@@ -1,14 +1,18 @@
 import React, { useCallback, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { useFocusEffect, useTheme } from '@react-navigation/native';
+import { FolderOpen } from 'lucide-react-native';
 import {
   AppContainer,
   AppFloatingButton,
+  AppText,
+  LoginBottomSheet,
 } from '../../components';
 import { getFolders } from '../../utils/storage';
 import ROUTES from '../../utils/routes';
-import { vs } from '../../theme/sizeMatter';
+import { vs, s, icon, Fonts, Radius, lineHeight } from '../../theme/sizeMatter';
 import { useTaskStore, getNextTodayTask } from '../../store/taskStore';
+import { useAuthStore } from '../../store/authStore';
 import {
   FolderCard,
   HomeHeader,
@@ -16,7 +20,13 @@ import {
 } from './components';
 
 const HomeScreen = ({ navigation }) => {
+  const { colors } = useTheme();
   const [folders, setFolders] = useState([]);
+  const [showLoginSheet, setShowLoginSheet] = useState(false);
+
+  const user = useAuthStore(state => state.user);
+  const isLoggedIn = !!user;
+
   const tasks = useTaskStore(state => state.tasks);
   const loadTasks = useTaskStore(state => state.loadTasks);
   const nextTodayTask = getNextTodayTask(tasks);
@@ -38,15 +48,33 @@ const HomeScreen = ({ navigation }) => {
   );
 
   const navigateToNewFolder = () => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+      return;
+    }
     navigation.navigate(ROUTES.ADD_NEW_FOLDER);
   };
 
   const navigateToNewTask = () => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+      return;
+    }
     navigation.navigate(ROUTES.ADD_NEW_TASK);
   };
 
   const navigateToTodayTasks = () => {
     navigation.navigate(ROUTES.TASKS);
+  };
+
+  const handleFloatingButtonPress = () => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+    }
+  };
+
+  const handleLoginPress = () => {
+    navigation.navigate(ROUTES.SIGN_IN);
   };
 
   const listHeader = (
@@ -58,6 +86,18 @@ const HomeScreen = ({ navigation }) => {
         onOpenTasks={navigateToTodayTasks}
       />
     </>
+  );
+
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <View style={[styles.emptyIconWrap, { backgroundColor: `${colors.primary}18` }]}>
+        <FolderOpen size={icon(34)} color={colors.primary} />
+      </View>
+      <AppText style={styles.emptyTitle}>No folders found</AppText>
+      <AppText muted style={styles.emptySubtitle}>
+        Create your first folder to start tracking and organizing your daily expenses.
+      </AppText>
+    </View>
   );
 
   return (
@@ -72,11 +112,13 @@ const HomeScreen = ({ navigation }) => {
           />
         )}
         ListHeaderComponent={listHeader}
+        ListEmptyComponent={renderEmpty}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
       <AppFloatingButton
-        isSubButtons
+        isSubButtons={isLoggedIn}
+        onPress={handleFloatingButtonPress}
         subButtons={[
           {
             key: 'folder',
@@ -91,6 +133,12 @@ const HomeScreen = ({ navigation }) => {
             onPress: navigateToNewTask,
           },
         ]}
+      />
+
+      <LoginBottomSheet
+        visible={showLoginSheet}
+        onClose={() => setShowLoginSheet(false)}
+        onLogin={handleLoginPress}
       />
     </AppContainer>
   );
@@ -109,4 +157,31 @@ const styles = StyleSheet.create({
     paddingBottom: vs(112),
     gap: vs(16),
   },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: s(32),
+    paddingVertical: vs(40),
+    marginTop: vs(20),
+  },
+  emptyIconWrap: {
+    width: s(72),
+    height: s(72),
+    borderRadius: Radius.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: vs(16),
+  },
+  emptyTitle: {
+    fontSize: Fonts.size.subtitle,
+    fontWeight: Fonts.weight.bold,
+    marginBottom: vs(8),
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: Fonts.size.bodySmall,
+    lineHeight: lineHeight(18, 1.3),
+    textAlign: 'center',
+  },
 });
+
