@@ -3,10 +3,12 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { useColorScheme } from 'react-native'
 import MainStack from './MainStack'
 import { LightThemeColors, DarkThemeColors } from '../theme/colors'
+import { useSettingsStore } from '../store/settingsStore'
 
 const RootNavigator = () => {
   const scheme = useColorScheme()
-  const isDarkMode = scheme === 'dark'
+  const themeMode = useSettingsStore(state => state.themeMode)
+  const isDarkMode = themeMode === 'system' ? scheme === 'dark' : themeMode === 'dark'
 
   const customLightTheme = {
     ...DefaultTheme,
@@ -32,3 +34,4 @@ const RootNavigator = () => {
 }
 
 export default RootNavigator
+

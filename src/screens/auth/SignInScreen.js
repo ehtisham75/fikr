@@ -40,7 +40,6 @@ const SignInScreen = ({ navigation }) => {
                 password,
             });
 
-
             if (error) {
                 showToast('error', 'Login Failed', error.message);
             } else {
