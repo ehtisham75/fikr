@@ -29,6 +29,16 @@ import { showToast } from '../../utils/helper';
 
 const formatAmount = amount => `$${Number(amount || 0).toFixed(2)}`;
 
+const getCurrentUserId = async () => {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data?.user?.id) {
+        throw error || new Error('Please log in to manage budgets.');
+    }
+
+    return data.user.id;
+};
+
 const BudgetItem = ({ item }) => {
     const { colors } = useTheme();
 
@@ -192,6 +202,7 @@ const BudgetScreen = () => {
         }
 
         try {
+            await getCurrentUserId();
             const { data, error } = await supabase
                 .from(SUPABASE_TABLES.BUDGETS)
                 .select(BUDGETS_SELECT_COLUMNS)
@@ -259,7 +270,9 @@ const BudgetScreen = () => {
         setIsSaving(true);
 
         try {
+            const userId = await getCurrentUserId();
             const payload = {
+                user_id: userId,
                 title: cleanTitle,
                 amount: numericAmount,
                 budget_month: monthKey,
