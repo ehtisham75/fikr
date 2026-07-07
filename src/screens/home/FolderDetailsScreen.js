@@ -17,12 +17,7 @@ import {
     AppText,
     AppTextInput,
 } from '../../components';
-import {
-    addExpense,
-    deleteExpense,
-    getExpenses,
-    updateFolderAmount,
-} from '../../utils/storage';
+import { useFolderStore } from '../../store/folderStore';
 import { showToast } from '../../utils/helper';
 import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 
@@ -30,7 +25,12 @@ const FolderDetailsScreen = ({ navigation, route }) => {
     const { colors } = useTheme();
     const folder = route.params?.folder;
 
-    const [expenses, setExpenses] = useState([]);
+    const expenses = useFolderStore(state => state.expenses);
+    const storeLoadExpenses = useFolderStore(state => state.loadExpenses);
+    const storeAddExpense = useFolderStore(state => state.addExpense);
+    const storeDeleteExpense = useFolderStore(state => state.deleteExpense);
+    const isSaving = useFolderStore(state => state.isSaving);
+
     const [totalAmount, setTotalAmount] = useState(folder?.amount ?? 0);
 
     // ─── Add-expense modal state ────────────────────────
@@ -42,14 +42,14 @@ const FolderDetailsScreen = ({ navigation, route }) => {
     useFocusEffect(
         useCallback(() => {
             if (!folder?.id) return;
-            const loaded = getExpenses(folder.id);
-            setExpenses(loaded);
-            setTotalAmount(loaded.reduce((sum, e) => sum + (e.amount || 0), 0));
-        }, [folder?.id]),
+            storeLoadExpenses(folder.id).then(loaded => {
+                setTotalAmount(loaded.reduce((sum, e) => sum + Number(e.amount || 0), 0));
+            });
+        }, [folder?.id, storeLoadExpenses]),
     );
 
     // ─── Handlers ──────────────────────────────────────
-    const handleAddExpense = () => {
+    const handleAddExpense = async () => {
         Keyboard.dismiss();
         const parsed = Number(newAmount.replace(/,/g, ''));
         if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -57,32 +57,33 @@ const FolderDetailsScreen = ({ navigation, route }) => {
             return;
         }
 
-        const expense = {
-            id: `exp-${Date.now()}`,
-            folder_id: folder.id,
-            amount: parsed,
-            note: newNote.trim() || 'Untitled expense',
-            date: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-        };
+        try {
+            await storeAddExpense(folder.id, {
+                amount: parsed,
+                note: newNote.trim() || 'Untitled expense',
+            });
 
-        const updated = addExpense(folder.id, expense);
-        setExpenses(updated);
-        const newTotal = updateFolderAmount(folder.id);
-        setTotalAmount(newTotal);
+            setNewAmount('');
+            setNewNote('');
+            setModalVisible(false);
 
-        setNewAmount('');
-        setNewNote('');
-        setModalVisible(false);
-        showToast('success', 'Expense added', `$${parsed.toFixed(2)} recorded.`);
+            const updated = useFolderStore.getState().expenses;
+            setTotalAmount(updated.reduce((sum, e) => sum + Number(e.amount || 0), 0));
+            showToast('success', 'Expense added', `$${parsed.toFixed(2)} recorded.`);
+        } catch (error) {
+            showToast('error', 'Could not save', error.message || 'Please try again.');
+        }
     };
 
-    const handleDeleteExpense = expenseId => {
-        const updated = deleteExpense(folder.id, expenseId);
-        setExpenses(updated);
-        const newTotal = updateFolderAmount(folder.id);
-        setTotalAmount(newTotal);
-        showToast('success', 'Removed', 'Expense deleted.');
+    const handleDeleteExpense = async expenseId => {
+        try {
+            await storeDeleteExpense(folder.id, expenseId);
+            const updated = useFolderStore.getState().expenses;
+            setTotalAmount(updated.reduce((sum, e) => sum + Number(e.amount || 0), 0));
+            showToast('success', 'Removed', 'Expense deleted.');
+        } catch (error) {
+            showToast('error', 'Could not delete', error.message || 'Please try again.');
+        }
     };
 
     // ─── Formatters ────────────────────────────────────

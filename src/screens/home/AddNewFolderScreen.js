@@ -8,17 +8,19 @@ import {
   AppText,
   AppTextInput,
 } from '../../components';
-import { getFolders, saveFolders } from '../../utils/storage';
+import { useFolderStore } from '../../store/folderStore';
 import { showToast } from '../../utils/helper';
 import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 
 const AddNewFolderScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const addFolder = useFolderStore(state => state.addFolder);
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [isLocked, setIsLocked] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const cleanName = name.trim();
     const numericAmount = Number(amount.replace(/,/g, '') || 0);
 
@@ -32,16 +34,22 @@ const AddNewFolderScreen = ({ navigation }) => {
       return;
     }
 
-    const nextFolder = {
-      id: `folder-${Date.now()}`,
-      name: cleanName,
-      amount: numericAmount,
-      is_locked: isLocked,
-    };
+    setIsSaving(true);
 
-    saveFolders([nextFolder, ...getFolders()]);
-    showToast('success', 'Folder created', `${cleanName} is ready.`);
-    navigation.goBack();
+    try {
+      await addFolder({
+        name: cleanName,
+        amount: numericAmount,
+        is_locked: isLocked,
+      });
+
+      showToast('success', 'Folder created', `${cleanName} is ready.`);
+      navigation.goBack();
+    } catch (error) {
+      showToast('error', 'Could not save', error.message || 'Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -131,8 +139,8 @@ const AddNewFolderScreen = ({ navigation }) => {
             </View>
           </Pressable>
 
-          <AppButton onPress={handleSave} style={styles.saveButton}>
-            Save Folder
+          <AppButton onPress={handleSave} disabled={isSaving} style={styles.saveButton}>
+            {isSaving ? 'Saving...' : 'Save Folder'}
           </AppButton>
         </ScrollView>
       </KeyboardAvoidingView>

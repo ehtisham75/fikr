@@ -8,10 +8,10 @@ import {
   AppText,
   LoginBottomSheet,
 } from '../../components';
-import { getFolders } from '../../utils/storage';
 import ROUTES from '../../utils/routes';
 import { vs, s, icon, Fonts, Radius, lineHeight } from '../../theme/sizeMatter';
 import { useTaskStore, getNextTodayTask } from '../../store/taskStore';
+import { useFolderStore } from '../../store/folderStore';
 import { useAuthStore } from '../../store/authStore';
 import {
   FolderCard,
@@ -21,30 +21,25 @@ import {
 
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
-  const [folders, setFolders] = useState([]);
   const [showLoginSheet, setShowLoginSheet] = useState(false);
 
   const user = useAuthStore(state => state.user);
   const isLoggedIn = !!user;
 
+  const folders = useFolderStore(state => state.folders);
+  const loadFolders = useFolderStore(state => state.loadFolders);
+
   const tasks = useTaskStore(state => state.tasks);
   const loadTasks = useTaskStore(state => state.loadTasks);
   const nextTodayTask = getNextTodayTask(tasks);
 
-  const fetchFolders = useCallback(() => {
-    try {
-      const loadedFolders = getFolders();
-      setFolders(loadedFolders);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
-      fetchFolders();
-      loadTasks();
-    }, [fetchFolders, loadTasks]),
+      if (isLoggedIn) {
+        loadFolders();
+        loadTasks();
+      }
+    }, [isLoggedIn, loadFolders, loadTasks]),
   );
 
   const navigateToNewFolder = () => {
@@ -108,7 +103,13 @@ const HomeScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <FolderCard
             item={item}
-            onPress={() => navigation.navigate(ROUTES.FOLDER_DETAILS, { folder: item })}
+            onPress={() => {
+              if (!isLoggedIn) {
+                setShowLoginSheet(true);
+                return;
+              }
+              navigation.navigate(ROUTES.FOLDER_DETAILS, { folder: item });
+            }}
           />
         )}
         ListHeaderComponent={listHeader}

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,8 +10,9 @@ import {
 import dayjs from 'dayjs';
 import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { CalendarDays, Clock3, Plus, WifiOff } from 'lucide-react-native';
-import { AppButton, AppContainer, AppText } from '../../components';
+import { AppButton, AppContainer, AppText, LoginBottomSheet } from '../../components';
 import { useTaskStore } from '../../store/taskStore';
+import { useAuthStore } from '../../store/authStore';
 import ROUTES from '../../utils/routes';
 import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 
@@ -60,6 +61,10 @@ const TasksScreen = ({ navigation }) => {
   const tasks = useTaskStore(state => state.tasks);
   const isLoading = useTaskStore(state => state.isLoading);
   const loadTasks = useTaskStore(state => state.loadTasks);
+  const [showLoginSheet, setShowLoginSheet] = useState(false);
+
+  const user = useAuthStore(state => state.user);
+  const isLoggedIn = !!user;
 
   const sortedTasks = useMemo(() => (
     [...tasks].sort((first, second) => {
@@ -77,12 +82,22 @@ const TasksScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      loadTasks();
-    }, [loadTasks]),
+      if (isLoggedIn) {
+        loadTasks();
+      }
+    }, [isLoggedIn, loadTasks]),
   );
 
   const navigateToAddTask = () => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+      return;
+    }
     navigation.navigate(ROUTES.ADD_NEW_TASK);
+  };
+
+  const handleLoginPress = () => {
+    navigation.navigate(ROUTES.SIGN_IN);
   };
 
   const renderEmpty = () => {
@@ -143,6 +158,12 @@ const TasksScreen = ({ navigation }) => {
             tintColor={colors.primary}
           />
         )}
+      />
+
+      <LoginBottomSheet
+        visible={showLoginSheet}
+        onClose={() => setShowLoginSheet(false)}
+        onLogin={handleLoginPress}
       />
     </AppContainer>
   );

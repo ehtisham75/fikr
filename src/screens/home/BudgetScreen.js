@@ -9,13 +9,14 @@ import {
     View,
 } from 'react-native';
 import dayjs from 'dayjs';
-import { useFocusEffect, useTheme } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useTheme } from '@react-navigation/native';
 import { CalendarDays, WalletCards } from 'lucide-react-native';
 import {
     AppButton,
     AppContainer,
     AppText,
     AppTextInput,
+    LoginBottomSheet,
 } from '../../components';
 import { supabase } from '../../lib/supabase';
 import {
@@ -24,8 +25,10 @@ import {
     isMissingSupabaseTableError,
     isSupabasePolicyError,
 } from '../../lib/supabaseTables';
+import { useAuthStore } from '../../store/authStore';
 import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 import { showToast } from '../../utils/helper';
+import ROUTES from '../../utils/routes';
 
 const formatAmount = amount => `$${Number(amount || 0).toFixed(2)}`;
 
@@ -173,14 +176,19 @@ const BudgetFooter = ({ colors, monthLabel, totalBudget }) => (
 
 const BudgetScreen = () => {
     const { colors } = useTheme();
+    const navigation = useNavigation();
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
     const [budgets, setBudgets] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isBudgetTableMissing, setIsBudgetTableMissing] = useState(false);
     const [currentDate, setCurrentDate] = useState(dayjs());
+    const [showLoginSheet, setShowLoginSheet] = useState(false);
+
+    const user = useAuthStore(state => state.user);
+    const isLoggedIn = !!user;
 
     const monthKey = currentDate.format('YYYY-MM');
     const monthLabel = currentDate.format('MMMM YYYY');
@@ -247,13 +255,19 @@ const BudgetScreen = () => {
 
     useFocusEffect(
         useCallback(() => {
+            if (!isLoggedIn) return;
             const now = dayjs();
             setCurrentDate(now);
             loadBudgets({ targetMonthKey: now.format('YYYY-MM') });
-        }, [loadBudgets]),
+        }, [isLoggedIn, loadBudgets]),
     );
 
     const handleSave = async () => {
+        if (!isLoggedIn) {
+            setShowLoginSheet(true);
+            return;
+        }
+
         const cleanTitle = title.trim();
         const numericAmount = Number(amount.replace(/,/g, ''));
 
@@ -383,6 +397,12 @@ const BudgetScreen = () => {
                     }
                 />
             </KeyboardAvoidingView>
+
+            <LoginBottomSheet
+                visible={showLoginSheet}
+                onClose={() => setShowLoginSheet(false)}
+                onLogin={() => navigation.navigate(ROUTES.SIGN_IN)}
+            />
         </AppContainer>
     );
 };
