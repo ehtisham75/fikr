@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+    Alert,
     FlatList,
     Keyboard,
     Modal,
@@ -9,7 +10,8 @@ import {
     View,
 } from 'react-native';
 import { useFocusEffect, useTheme } from '@react-navigation/native';
-import { ArrowLeft, Plus, Receipt, Trash2 } from 'lucide-react-native';
+import dayjs from 'dayjs';
+import { ArrowLeft, Plus, Receipt, Trash2, Edit } from 'lucide-react-native';
 import {
     AppButton,
     AppContainer,
@@ -29,14 +31,21 @@ const FolderDetailsScreen = ({ navigation, route }) => {
     const storeLoadExpenses = useFolderStore(state => state.loadExpenses);
     const storeAddExpense = useFolderStore(state => state.addExpense);
     const storeDeleteExpense = useFolderStore(state => state.deleteExpense);
+    const storeRenameFolder = useFolderStore(state => state.renameFolder);
+    const storeDeleteFolder = useFolderStore(state => state.deleteFolder);
     const isSaving = useFolderStore(state => state.isSaving);
 
+    const [folderName, setFolderName] = useState(folder?.name ?? 'Untitled');
     const [totalAmount, setTotalAmount] = useState(folder?.amount ?? 0);
 
     // ─── Add-expense modal state ────────────────────────
     const [modalVisible, setModalVisible] = useState(false);
     const [newAmount, setNewAmount] = useState('');
     const [newNote, setNewNote] = useState('');
+
+    // ─── Rename-folder modal state ──────────────────────
+    const [renameModalVisible, setRenameModalVisible] = useState(false);
+    const [renameValue, setRenameValue] = useState(folderName);
 
     // ─── Load expenses on focus ────────────────────────
     useFocusEffect(
@@ -86,14 +95,47 @@ const FolderDetailsScreen = ({ navigation, route }) => {
         }
     };
 
-    // ─── Formatters ────────────────────────────────────
-    const formatDate = iso => {
-        const d = new Date(iso);
-        return d.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
+    const handleRenameFolder = async () => {
+        Keyboard.dismiss();
+        const cleanName = renameValue.trim();
+        if (!cleanName) {
+            showToast('error', 'Invalid name', 'Please enter a folder name.');
+            return;
+        }
+
+        try {
+            await storeRenameFolder(folder.id, cleanName);
+            setFolderName(cleanName);
+            setRenameModalVisible(false);
+            showToast('success', 'Folder renamed', 'Folder name updated.');
+        } catch (error) {
+            showToast('error', 'Rename failed', error.message || 'Could not rename folder.');
+        }
+    };
+
+    const handleDeleteFolderConfirm = () => {
+        Alert.alert(
+            'Delete Folder',
+            `Are you sure you want to delete "${folderName}" and all of its expenses? This action is permanent.`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: handleDeleteFolder,
+                },
+            ],
+        );
+    };
+
+    const handleDeleteFolder = async () => {
+        try {
+            await storeDeleteFolder(folder.id);
+            showToast('success', 'Folder deleted', 'The folder was deleted successfully.');
+            navigation.goBack();
+        } catch (error) {
+            showToast('error', 'Delete failed', error.message || 'Could not delete folder.');
+        }
     };
 
     // ─── Render helpers ────────────────────────────────
@@ -101,14 +143,14 @@ const FolderDetailsScreen = ({ navigation, route }) => {
         <View
             style={[
                 styles.expenseRow,
-                { backgroundColor: colors.card, borderColor: colors.cardBorder },
+                { backgroundColor: colors.card, borderColor: colors.border },
             ]}>
             <View style={styles.expenseContent}>
                 <AppText style={styles.expenseNote} numberOfLines={1}>
                     {item.note}
                 </AppText>
                 <AppText muted style={styles.expenseDate}>
-                    {formatDate(item.date)}
+                    {dayjs(item.date).format('MMM D, YYYY')}
                 </AppText>
             </View>
             <AppText style={[styles.expenseAmount, { color: colors.primary }]}>
@@ -148,10 +190,33 @@ const FolderDetailsScreen = ({ navigation, route }) => {
                     <ArrowLeft size={icon(22)} color={colors.text} />
                 </Pressable>
                 <View style={styles.headerCopy}>
-                    <AppText muted style={styles.eyebrow}>Folder</AppText>
-                    <AppText variant="heading" style={[styles.title, { color: colors.primary }]}>
-                        {folder?.name ?? 'Untitled'}
+                    <AppText variant="heading" numberOfLines={1}
+                        style={[styles.title, { color: colors.primary }]}>
+                        {folderName}
                     </AppText>
+                </View>
+                <View style={styles.headerActions}>
+                    <Pressable
+                        onPress={() => {
+                            setRenameValue(folderName);
+                            setRenameModalVisible(true);
+                        }}
+                        hitSlop={8}
+                        style={({ pressed }) => [
+                            styles.headerActionButton,
+                            pressed && { opacity: 0.6 },
+                        ]}>
+                        <Edit size={icon(18)} color={colors.textSecondary} />
+                    </Pressable>
+                    <Pressable
+                        onPress={handleDeleteFolderConfirm}
+                        hitSlop={8}
+                        style={({ pressed }) => [
+                            styles.headerActionButton,
+                            pressed && { opacity: 0.6 },
+                        ]}>
+                        <Trash2 size={icon(18)} color={colors.error} />
+                    </Pressable>
                 </View>
             </View>
 
@@ -159,7 +224,7 @@ const FolderDetailsScreen = ({ navigation, route }) => {
             <View
                 style={[
                     styles.totalCard,
-                    { backgroundColor: colors.card, borderColor: colors.cardBorder },
+                    { backgroundColor: colors.card, borderColor: colors.border },
                 ]}>
                 <AppText muted style={styles.totalLabel}>Total spent</AppText>
                 <AppText style={[styles.totalValue, { color: colors.text }]}>
@@ -177,7 +242,6 @@ const FolderDetailsScreen = ({ navigation, route }) => {
         </>
     );
 
-    // ─── Screen ────────────────────────────────────────
     return (
         <AppContainer contentStyle={styles.screen}>
             <FlatList
@@ -189,6 +253,100 @@ const FolderDetailsScreen = ({ navigation, route }) => {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
             />
+
+            {/* ─── FAB ──────────────────────────────────────── */}
+            <Pressable
+                onPress={() => setModalVisible(true)}
+                style={({ pressed }) => [
+                    styles.fab,
+                    { backgroundColor: colors.primary },
+                    pressed && { transform: [{ scale: 0.94 }] },
+                ]}>
+                <Plus size={icon(24)} color={colors.white} />
+            </Pressable>
+
+            {/* ─── Add expense modal ────────────────────────── */}
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}>
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => setModalVisible(false)}>
+                    <Pressable
+                        onPress={() => { }}
+                        style={[styles.modalContent, { backgroundColor: colors.background }]}>
+                        <AppKeyboardAvoidingView>
+                            <View style={styles.modalInner}>
+                                <View style={styles.modalHandle} />
+                                <AppText variant="heading" style={styles.modalTitle}>
+                                    New expense
+                                </AppText>
+
+                                <AppTextInput
+                                    label="Amount"
+                                    placeholder="0.00"
+                                    keyboardType="decimal-pad"
+                                    value={newAmount}
+                                    onChangeText={setNewAmount}
+                                />
+                                <AppTextInput
+                                    label="Note"
+                                    placeholder="Coffee, lunch, transport..."
+                                    value={newNote}
+                                    onChangeText={setNewNote}
+                                />
+
+                                <AppButton
+                                    onPress={handleAddExpense}
+                                    disabled={!newAmount || isSaving}
+                                    style={styles.modalButton}>
+                                    {isSaving ? 'Adding...' : 'Add Expense'}
+                                </AppButton>
+                            </View>
+                        </AppKeyboardAvoidingView>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            {/* ─── Rename Folder modal ──────────────────────── */}
+            <Modal
+                visible={renameModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setRenameModalVisible(false)}>
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => setRenameModalVisible(false)}>
+                    <Pressable
+                        onPress={() => { }}
+                        style={[styles.modalContent, { backgroundColor: colors.background }]}>
+                        <AppKeyboardAvoidingView>
+                            <View style={styles.modalInner}>
+                                <View style={styles.modalHandle} />
+                                <AppText variant="heading" style={styles.modalTitle}>
+                                    Rename Folder
+                                </AppText>
+
+                                <AppTextInput
+                                    label="Folder Name"
+                                    placeholder="e.g. Shopping, Trips"
+                                    value={renameValue}
+                                    onChangeText={setRenameValue}
+                                />
+
+                                <AppButton
+                                    onPress={handleRenameFolder}
+                                    disabled={!renameValue.trim() || isSaving}
+                                    style={styles.modalButton}>
+                                    {isSaving ? 'Saving...' : 'Rename Folder'}
+                                </AppButton>
+                            </View>
+                        </AppKeyboardAvoidingView>
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </AppContainer>
     );
 };
@@ -230,8 +388,20 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
     },
     title: {
-        fontSize: Fonts.size.heading,
+        fontSize: Fonts.size.body,
         lineHeight: lineHeight(30, 1.2),
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: s(8),
+    },
+    headerActionButton: {
+        width: s(36),
+        height: s(36),
+        borderRadius: Radius.round,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     // Total card

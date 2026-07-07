@@ -91,6 +91,55 @@ export const useFolderStore = create((set, get) => ({
         }
     },
 
+    renameFolder: async (folderId, newName) => {
+        set({ isSaving: true });
+        try {
+            await getCurrentUserId();
+
+            const { data, error } = await supabase
+                .from(SUPABASE_TABLES.FOLDERS)
+                .update({ name: newName.trim() })
+                .eq('id', folderId)
+                .select(FOLDERS_SELECT_COLUMNS)
+                .single();
+
+            if (error) throw error;
+
+            set({
+                folders: get().folders.map(f => (f.id === folderId ? data : f)),
+            });
+            return data;
+        } catch (error) {
+            console.log('Folder rename error:', error);
+            throw error;
+        } finally {
+            set({ isSaving: false });
+        }
+    },
+
+    deleteFolder: async (folderId) => {
+        set({ isSaving: true });
+        try {
+            await getCurrentUserId();
+
+            const { error } = await supabase
+                .from(SUPABASE_TABLES.FOLDERS)
+                .delete()
+                .eq('id', folderId);
+
+            if (error) throw error;
+
+            set({
+                folders: get().folders.filter(f => f.id !== folderId),
+            });
+        } catch (error) {
+            console.log('Folder delete error:', error);
+            throw error;
+        } finally {
+            set({ isSaving: false });
+        }
+    },
+
     // ─── Expenses ─────────────────────────────────────
 
     loadExpenses: async folderId => {

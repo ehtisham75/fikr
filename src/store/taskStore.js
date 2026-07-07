@@ -243,6 +243,61 @@ export const useTaskStore = create((set, get) => ({
       set({ isSyncing: false });
     }
   },
+
+  toggleTask: async taskId => {
+    const task = get().tasks.find(t => String(t.id) === String(taskId));
+    if (!task) return;
+
+    const newCompleted = !task.is_completed;
+
+    // Optimistic local update
+    const updatedTasks = sortTasks(
+      get().tasks.map(t =>
+        String(t.id) === String(taskId)
+          ? { ...t, is_completed: newCompleted, updated_at: dayjs().toISOString() }
+          : t,
+      ),
+    );
+    saveArray(TASKS_KEY, updatedTasks);
+    set({ tasks: updatedTasks });
+
+    // Sync to Supabase (skip for pending offline tasks)
+    if (task.sync_status !== 'pending') {
+      try {
+        const { error } = await supabase
+          .from(SUPABASE_TABLES.TASKS)
+          .update({ is_completed: newCompleted, updated_at: dayjs().toISOString() })
+          .eq('id', taskId);
+
+        if (error) throw error;
+      } catch (error) {
+        console.log('Toggle task sync error:', error);
+      }
+    }
+  },
+
+  deleteTask: async taskId => {
+    // Optimistic local removal
+    const updatedTasks = get().tasks.filter(t => String(t.id) !== String(taskId));
+    const updatedPending = get().pendingTasks.filter(t => String(t.id) !== String(taskId));
+    saveArray(TASKS_KEY, updatedTasks);
+    saveArray(PENDING_TASKS_KEY, updatedPending);
+    set({ tasks: updatedTasks, pendingTasks: updatedPending });
+
+    // Delete from Supabase (skip for local-only tasks)
+    if (!String(taskId).startsWith('local-')) {
+      try {
+        const { error } = await supabase
+          .from(SUPABASE_TABLES.TASKS)
+          .delete()
+          .eq('id', taskId);
+
+        if (error) throw error;
+      } catch (error) {
+        console.log('Delete task sync error:', error);
+      }
+    }
+  },
 }));
 
 export const getTodayTasks = tasks => {
