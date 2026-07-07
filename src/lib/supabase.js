@@ -30,7 +30,7 @@ const supabaseStorage = createMMKV({
 const mmkvSupabaseStorage = {
     getItem: key => supabaseStorage.getString(key) ?? null,
     setItem: (key, value) => supabaseStorage.set(key, value),
-    removeItem: key => supabaseStorage.delete(key),
+    removeItem: key => supabaseStorage.remove(key),
 };
 
 export const supabase = createClient(

@@ -108,7 +108,7 @@ const HomeScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <FolderCard
             item={item}
-            onPress={() => console.log('Opened folder:', item.name)}
+            onPress={() => navigation.navigate(ROUTES.FOLDER_DETAILS, { folder: item })}
           />
         )}
         ListHeaderComponent={listHeader}

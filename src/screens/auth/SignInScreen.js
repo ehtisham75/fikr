@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { useTheme } from '@react-navigation/native';
-import { AppContainer, AppText, AppTextInput, AppButton, AppLogo } from '../../components';
+import { AppContainer, AppText, AppTextInput, AppButton, AppLogo, AppKeyboardAvoidingView } from '../../components';
 import ROUTES from '../../utils/routes';
 import { loginSchema } from '../../utils/authValidator';
 import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
@@ -51,6 +51,7 @@ const SignInScreen = ({ navigation }) => {
             }
         } catch (error) {
             showToast('error', 'Login Error', error.message || 'An unexpected error occurred.');
+            console.log("=== login error ====", error);
         } finally {
             setLoading(false);
         }
@@ -58,81 +59,74 @@ const SignInScreen = ({ navigation }) => {
 
     return (
         <AppContainer>
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={styles.inner}>
+            <AppKeyboardAvoidingView>
+                <View style={styles.inner}>
+                    <AppLogo size={80} containerStyle={styles.logo} />
 
-                        <AppLogo size={80} containerStyle={styles.logo} />
-
-                        {/* Header */}
-                        <View style={styles.header}>
-                            <AppText variant="title" style={styles.title}>
-                                Welcome back
-                            </AppText>
-                            <AppText muted style={styles.subtitle}>
-                                Log in to continue tracking your mindful spending.
-                            </AppText>
-                        </View>
-
-                        {/* Form */}
-                        <View style={styles.form}>
-                            <AppTextInput
-                                label="Email"
-                                placeholder="Enter your email"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                value={email}
-                                onChangeText={(text) => {
-                                    setEmail(text);
-                                    if (errors.email) setErrors({ ...errors, email: null });
-                                }}
-                                error={errors.email}
-                            />
-                            <AppTextInput
-                                label="Password"
-                                placeholder="Enter your password"
-                                secureTextEntry
-                                value={password}
-                                onChangeText={(text) => {
-                                    setPassword(text);
-                                    if (errors.password) setErrors({ ...errors, password: null });
-                                }}
-                                error={errors.password}
-                            />
-                            <Pressable
-                                onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
-                                style={styles.forgotPasswordContainer}
-                            >
-                                <AppText style={[styles.forgotPasswordText, linkTextTheme]}>
-                                    Forgot password?
-                                </AppText>
-                            </Pressable>
-                        </View>
-
-                        {/* Actions */}
-                        <View style={styles.actions}>
-                            <AppButton
-                                onPress={handleLogin}
-                                disabled={!email || !password || loading}
-                            >
-                                {loading ? 'Logging in...' : 'Log in'}
-                            </AppButton>
-                            <Pressable
-                                onPress={() => navigation.navigate(ROUTES.SIGN_UP)}
-                                style={styles.footerLinkContainer}
-                            >
-                                <AppText muted>
-                                    Don't have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Sign up</AppText>
-                                </AppText>
-                            </Pressable>
-                        </View>
-
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <AppText variant="title" style={styles.title}>
+                            Welcome back
+                        </AppText>
+                        <AppText muted style={styles.subtitle}>
+                            Log in to continue tracking your mindful spending.
+                        </AppText>
                     </View>
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
+
+                    {/* Form */}
+                    <View style={styles.form}>
+                        <AppTextInput
+                            label="Email"
+                            placeholder="Enter your email"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            value={email}
+                            onChangeText={(text) => {
+                                setEmail(text);
+                                if (errors.email) setErrors({ ...errors, email: null });
+                            }}
+                            error={errors.email}
+                        />
+                        <AppTextInput
+                            label="Password"
+                            placeholder="Enter your password"
+                            secureTextEntry
+                            value={password}
+                            onChangeText={(text) => {
+                                setPassword(text);
+                                if (errors.password) setErrors({ ...errors, password: null });
+                            }}
+                            error={errors.password}
+                        />
+                        <Pressable
+                            onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
+                            style={styles.forgotPasswordContainer}
+                        >
+                            <AppText style={[styles.forgotPasswordText, linkTextTheme]}>
+                                Forgot password?
+                            </AppText>
+                        </Pressable>
+                    </View>
+
+                    {/* Actions */}
+                    <View style={styles.actions}>
+                        <AppButton
+                            onPress={handleLogin}
+                            disabled={!email || !password || loading}
+                        >
+                            {loading ? 'Logging in...' : 'Log in'}
+                        </AppButton>
+                        <Pressable
+                            onPress={() => navigation.navigate(ROUTES.SIGN_UP)}
+                            style={styles.footerLinkContainer}
+                        >
+                            <AppText muted>
+                                Don't have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Sign up</AppText>
+                            </AppText>
+                        </Pressable>
+                    </View>
+                </View>
+            </AppKeyboardAvoidingView>
         </AppContainer>
     );
 };
@@ -140,9 +134,6 @@ const SignInScreen = ({ navigation }) => {
 export default SignInScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     inner: {
         flex: 1,
         paddingHorizontal: s(24),
