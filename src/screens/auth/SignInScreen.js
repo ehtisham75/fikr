@@ -1,133 +1,116 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '@react-navigation/native';
-import { AppContainer, AppText, AppTextInput, AppButton, AppLogo, AppKeyboardAvoidingView } from '../../components';
+import { AppButton, AppText, AppTextInput } from '../../components';
+import { supabase } from '../../lib/supabase';
 import ROUTES from '../../utils/routes';
 import { loginSchema } from '../../utils/authValidator';
-import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
-import { supabase } from '../../lib/supabase';
+import { formatZodErrors, getAuthErrorMessage } from '../../utils/authHelpers';
 import { showToast } from '../../utils/helper';
+import { Fonts, s, vs } from '../../theme/sizeMatter';
+import AuthScaffold from './components/AuthScaffold';
+import resetNavigation from '../../utils/resetNavigation';
 
 const SignInScreen = ({ navigation }) => {
     const { colors } = useTheme();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [state, setState] = useState({
+        email: '',
+        password: '',
+        isLoading: false,
+        errors: {},
+    });
+    const updateState = value => setState(prev => ({ ...prev, ...value }));
     const linkTextTheme = { color: colors.primary };
 
     const handleLogin = async () => {
-        // Clear previous errors
-        setErrors({});
+        updateState({ errors: {} });
 
-        // Validate using Zod
-        const validationResult = loginSchema.safeParse({ email, password });
+        const validationResult = loginSchema.safeParse({
+            email: state.email,
+            password: state.password,
+        });
 
         if (!validationResult.success) {
-            // Map Zod errors to our state
-            const formattedErrors = {};
-            validationResult.error.issues.forEach(issue => {
-                formattedErrors[issue.path[0]] = issue.message;
-            });
-            setErrors(formattedErrors);
+            updateState({ errors: formatZodErrors(validationResult) });
             return;
         }
 
-        setLoading(true);
+        updateState({ isLoading: true });
+
         try {
             const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
+                email: state.email.trim(),
+                password: state.password,
             });
 
             if (error) {
-                showToast('error', 'Login Failed', error.message);
-            } else {
-                showToast('success', 'Logged In', 'Welcome back!');
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: ROUTES.HOME }],
-                });
+                throw error;
             }
+
+            showToast('success', 'Welcome back', 'You are logged in.');
+            resetNavigation(navigation, ROUTES.HOME);
+
         } catch (error) {
-            showToast('error', 'Login Error', error.message || 'An unexpected error occurred.');
-            console.log("=== login error ====", error);
+            showToast('error', 'Login failed', getAuthErrorMessage(error));
         } finally {
-            setLoading(false);
+            updateState({ isLoading: false });
         }
     };
 
     return (
-        <AppContainer>
-            <AppKeyboardAvoidingView>
-                <View style={styles.inner}>
-                    <AppLogo size={80} containerStyle={styles.logo} />
+        <AuthScaffold
+            navigation={navigation}
+            title="Welcome back"
+            subtitle="Log in to continue tracking your mindful spending.">
+            <AppTextInput
+                label="Email"
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={state.email}
+                onChangeText={text => updateState({
+                    email: text,
+                    errors: { ...state.errors, email: null },
+                })}
+                error={state.errors.email}
+            />
+            <AppTextInput
+                label="Password"
+                placeholder="Enter your password"
+                secureTextEntry
+                value={state.password}
+                onChangeText={text => updateState({
+                    password: text,
+                    errors: { ...state.errors, password: null },
+                })}
+                error={state.errors.password}
+            />
 
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <AppText variant="title" style={styles.title}>
-                            Welcome back
-                        </AppText>
-                        <AppText muted style={styles.subtitle}>
-                            Log in to continue tracking your mindful spending.
-                        </AppText>
-                    </View>
+            <Pressable
+                onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
+                style={styles.forgotPasswordContainer}>
+                <AppText style={[styles.forgotPasswordText, linkTextTheme]}>
+                    Forgot password?
+                </AppText>
+            </Pressable>
 
-                    {/* Form */}
-                    <View style={styles.form}>
-                        <AppTextInput
-                            label="Email"
-                            placeholder="Enter your email"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            value={email}
-                            onChangeText={(text) => {
-                                setEmail(text);
-                                if (errors.email) setErrors({ ...errors, email: null });
-                            }}
-                            error={errors.email}
-                        />
-                        <AppTextInput
-                            label="Password"
-                            placeholder="Enter your password"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                if (errors.password) setErrors({ ...errors, password: null });
-                            }}
-                            error={errors.password}
-                        />
-                        <Pressable
-                            onPress={() => navigation.navigate(ROUTES.FORGOT_PASSWORD)}
-                            style={styles.forgotPasswordContainer}
-                        >
-                            <AppText style={[styles.forgotPasswordText, linkTextTheme]}>
-                                Forgot password?
-                            </AppText>
-                        </Pressable>
-                    </View>
-
-                    {/* Actions */}
-                    <View style={styles.actions}>
-                        <AppButton
-                            onPress={handleLogin}
-                            disabled={!email || !password || loading}
-                        >
-                            {loading ? 'Logging in...' : 'Log in'}
-                        </AppButton>
-                        <Pressable
-                            onPress={() => navigation.navigate(ROUTES.SIGN_UP)}
-                            style={styles.footerLinkContainer}
-                        >
-                            <AppText muted>
-                                Don't have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Sign up</AppText>
-                            </AppText>
-                        </Pressable>
-                    </View>
-                </View>
-            </AppKeyboardAvoidingView>
-        </AppContainer>
+            <View style={styles.actions}>
+                <AppButton
+                    onPress={handleLogin}
+                    loading={state.isLoading}
+                    disabled={!state.email || !state.password}>
+                    Log in
+                </AppButton>
+                <Pressable
+                    onPress={() => navigation.navigate(ROUTES.SIGN_UP)}
+                    style={styles.footerLinkContainer}>
+                    <AppText muted style={styles.footerText}>
+                        Don't have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Sign up</AppText>
+                    </AppText>
+                </Pressable>
+            </View>
+        </AuthScaffold>
     );
 };
 
@@ -159,19 +142,23 @@ const styles = StyleSheet.create({
     },
     forgotPasswordContainer: {
         alignSelf: 'flex-end',
-        marginTop: vs(4),
         paddingVertical: vs(8),
+        paddingHorizontal: s(2),
     },
     forgotPasswordText: {
         fontWeight: Fonts.weight.semiBold,
         fontSize: Fonts.size.bodySmall,
     },
     actions: {
-        gap: vs(24),
+        gap: vs(20),
+        marginTop: vs(14),
     },
     footerLinkContainer: {
         alignItems: 'center',
         paddingVertical: vs(12),
+    },
+    footerText: {
+        textAlign: 'center',
     },
     footerLinkText: {
         fontWeight: Fonts.weight.bold,

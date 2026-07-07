@@ -1,36 +1,34 @@
-import React from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native'
+import { s, vs } from '../theme/sizeMatter'
 
-export default function AppKeyboardAvoidingView({ children, style, contentContainerStyle }) {
-
+const AppKeyboardAvoidingView = ({ children, style, behavior }) => {
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
-            style={[styles.container, style]}>
+            style={[styles.container, style]}
+            behavior={behavior || (Platform.OS === 'ios' ? 'padding' : 'height')}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <ScrollView
-                    contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
+                    contentContainerStyle={styles.content}
                     keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* <View style={[styles.inner, contentContainerStyle]}> */}
+                    showsVerticalScrollIndicator={false}>
                     {children}
-                    {/* </View> */}
                 </ScrollView>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     )
-
 }
+
+export default AppKeyboardAvoidingView
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    inner: {
-        flex: 1,
-    },
-    scrollContent: {
+
+    content: {
         flexGrow: 1,
+        paddingHorizontal: s(24),
+        paddingTop: vs(24),
+        paddingBottom: vs(32),
     },
-});
+})

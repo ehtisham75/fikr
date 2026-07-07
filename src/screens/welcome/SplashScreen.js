@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import ROUTES from '../../utils/routes';
 import { AppLogo } from '../../components';
+import { supabase } from '../../lib/supabase';
 import { Fonts, SCREEN_HEIGHT, SCREEN_WIDTH, lineHeight, s, vs } from '../../theme/sizeMatter';
 import { supabase } from '../../lib/supabase';
 
@@ -45,6 +46,16 @@ const SplashScreen = ({ navigation }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const completeSplash = async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      navigation.replace(data?.session ? ROUTES.HOME : ROUTES.WELCOME);
+    } catch (error) {
+      console.log('Splash auth session error:', error);
+      navigation.replace(ROUTES.WELCOME);
+    }
+  };
 
   const startAnimations = () => {
     // Circle ripple effect

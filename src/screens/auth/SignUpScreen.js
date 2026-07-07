@@ -1,191 +1,152 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '@react-navigation/native';
-import { AppContainer, AppText, AppTextInput, AppButton, AppLogo, AppKeyboardAvoidingView } from '../../components';
+import { AppButton, AppText, AppTextInput } from '../../components';
+import { supabase } from '../../lib/supabase';
 import ROUTES from '../../utils/routes';
 import { signupSchema } from '../../utils/authValidator';
-import { Fonts, lineHeight, s, vs } from '../../theme/sizeMatter';
-import { supabase } from '../../lib/supabase';
+import { formatZodErrors, getAuthErrorMessage } from '../../utils/authHelpers';
 import { showToast } from '../../utils/helper';
+import { Fonts, vs } from '../../theme/sizeMatter';
+import resetNavigation from '../../utils/resetNavigation';
+import AuthScaffold from './components/AuthScaffold';
 
 const SignUpScreen = ({ navigation }) => {
   const { colors } = useTheme();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState({
+    name: '',
+    email: '',
+    password: '',
+    isLoading: false,
+    errors: {},
+  });
+  const updateState = value => setState(prev => ({ ...prev, ...value }));
   const linkTextTheme = { color: colors.primary };
 
   const handleSignup = async () => {
-    // Clear previous errors
-    setErrors({});
+    updateState({ errors: {} });
 
-    // Validate using Zod
-    const validationResult = signupSchema.safeParse({ name, email, password });
+    const validationResult = signupSchema.safeParse({
+      name: state.name,
+      email: state.email,
+      password: state.password,
+    });
 
     if (!validationResult.success) {
-      // Map Zod errors to our state
-      const formattedErrors = {};
-      validationResult.error.issues.forEach(issue => {
-        formattedErrors[issue.path[0]] = issue.message;
-      });
-      setErrors(formattedErrors);
+      updateState({ errors: formatZodErrors(validationResult) });
       return;
     }
 
-    setLoading(true);
+    updateState({ isLoading: true });
+
     try {
+      const email = state.email.trim();
       const { data, error } = await supabase.auth.signUp({
         email,
-        password,
+        password: state.password,
         options: {
           data: {
-            name: name,
+            full_name: state.name.trim(),
           },
         },
       });
 
       if (error) {
-        showToast('error', 'Signup Failed', error.message);
-      } else {
-        if (data?.session) {
-          showToast('success', 'Welcome', 'Account created successfully!');
-          navigation.reset({
-            index: 0,
-            routes: [{ name: ROUTES.HOME }],
-          });
-        } else {
-          showToast('success', 'Account Created', 'Check your email for the confirmation link!');
-          navigation.replace(ROUTES.SIGN_IN);
-        }
+        throw error;
       }
+
+      if (data?.session) {
+        showToast('success', 'Account created', 'You are logged in.');
+        resetNavigation(navigation, ROUTES.HOME);
+        return;
+      }
+
+      showToast('success', 'Check your email', 'Enter the verification code we sent.');
+      navigation.navigate(ROUTES.OTP_VERIFICATION, {
+        email,
+        flow: 'signup',
+      });
     } catch (error) {
-      showToast('error', 'Signup Error', error.message || 'An unexpected error occurred.');
+      showToast('error', 'Signup failed', getAuthErrorMessage(error));
     } finally {
-      setLoading(false);
+      updateState({ isLoading: false });
     }
   };
 
   return (
-    <AppContainer contentStyle={styles.screen}>
-      <AppKeyboardAvoidingView>
-        <View style={styles.inner}>
+    <AuthScaffold
+      navigation={navigation}
+      showBack
+      title="Create an account"
+      subtitle="Start your journey toward mindful spending.">
+      <AppTextInput
+        label="Full Name"
+        placeholder="Enter your name"
+        autoCapitalize="words"
+        value={state.name}
+        onChangeText={text => updateState({
+          name: text,
+          errors: { ...state.errors, name: null },
+        })}
+        error={state.errors.name}
+      />
+      <AppTextInput
+        label="Email"
+        placeholder="Enter your email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        value={state.email}
+        onChangeText={text => updateState({
+          email: text,
+          errors: { ...state.errors, email: null },
+        })}
+        error={state.errors.email}
+      />
+      <AppTextInput
+        label="Password"
+        placeholder="Create a password"
+        secureTextEntry
+        value={state.password}
+        onChangeText={text => updateState({
+          password: text,
+          errors: { ...state.errors, password: null },
+        })}
+        error={state.errors.password}
+      />
 
-          <AppLogo size={80} containerStyle={styles.logo} />
-
-          {/* Header */}
-          <View style={styles.header}>
-            <AppText variant="title" style={styles.title}>
-              Create an account
-            </AppText>
-            <AppText muted style={styles.subtitle}>
-              Start your journey towards mindful spending.
-            </AppText>
-          </View>
-
-          {/* Form */}
-          <View style={styles.form}>
-            <AppTextInput
-              label="Full Name"
-              placeholder="Enter your name"
-              autoCapitalize="words"
-              value={name}
-              onChangeText={(text) => {
-                setName(text);
-                if (errors.name) setErrors({ ...errors, name: null });
-              }}
-              error={errors.name}
-            />
-            <AppTextInput
-              label="Email"
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (errors.email) setErrors({ ...errors, email: null });
-              }}
-              error={errors.email}
-            />
-            <AppTextInput
-              label="Password"
-              placeholder="Create a password"
-              secureTextEntry
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                if (errors.password) setErrors({ ...errors, password: null });
-              }}
-              error={errors.password}
-            />
-          </View>
-
-          {/* Actions */}
-          <View style={styles.actions}>
-            <AppButton
-              onPress={handleSignup}
-              disabled={!name || !email || !password || loading}
-            >
-              {loading ? 'Creating Account...' : 'Sign up'}
-            </AppButton>
-            <Pressable
-              onPress={() => navigation.navigate(ROUTES.SIGN_IN)}
-              style={styles.footerLinkContainer}
-            >
-              <AppText muted>
-                Already have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Log in</AppText>
-              </AppText>
-            </Pressable>
-          </View>
-
-        </View>
-      </AppKeyboardAvoidingView>
-    </AppContainer>
+      <View style={styles.actions}>
+        <AppButton
+          onPress={handleSignup}
+          loading={state.isLoading}
+          disabled={!state.name || !state.email || !state.password}>
+          Sign up
+        </AppButton>
+        <Pressable
+          onPress={() => navigation.navigate(ROUTES.SIGN_IN)}
+          style={styles.footerLinkContainer}>
+          <AppText muted style={styles.footerText}>
+            Already have an account? <AppText style={[styles.footerLinkText, linkTextTheme]}>Log in</AppText>
+          </AppText>
+        </Pressable>
+      </View>
+    </AuthScaffold>
   );
 };
 
 export default SignUpScreen;
 
 const styles = StyleSheet.create({
-  screen: {
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  container: {
-    flex: 1,
-  },
-  inner: {
-    flex: 1,
-    paddingHorizontal: s(24),
-    paddingTop: vs(60),
-    // justifyContent: 'center',
-  },
-  logo: {
-    alignSelf: 'center',
-  },
-  header: {
-    marginBottom: vs(40),
-    marginTop: vs(20),
-  },
-  title: {
-    fontSize: Fonts.size.title,
-    lineHeight: lineHeight(36, 1.22),
-  },
-  subtitle: {
-    fontSize: Fonts.size.body,
-    marginTop: vs(8),
-  },
-  form: {
-    marginBottom: vs(32),
-  },
   actions: {
-    gap: vs(24),
+    gap: vs(20),
+    marginTop: vs(18),
   },
   footerLinkContainer: {
     alignItems: 'center',
     paddingVertical: vs(12),
+  },
+  footerText: {
+    textAlign: 'center',
   },
   footerLinkText: {
     fontWeight: Fonts.weight.bold,

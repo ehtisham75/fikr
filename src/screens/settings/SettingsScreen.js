@@ -1,273 +1,120 @@
-import React, { useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { useTheme } from '@react-navigation/native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { AppContainer, AppText, AppButton } from '../../components';
-import { SettingsRow, SettingsSwitch, PinModal } from './components';
-import { useSettingsStore } from '../../store/settingsStore';
-import { useAuthStore } from '../../store/authStore';
+import React, { useCallback, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useFocusEffect, useNavigation, useTheme } from '@react-navigation/native';
+import { LogOut, Mail, UserRound } from 'lucide-react-native';
+import {
+  AppButton,
+  AppContainer,
+  AppText,
+} from '../../components';
 import { supabase } from '../../lib/supabase';
 import ROUTES from '../../utils/routes';
 import { showToast } from '../../utils/helper';
-import { storage } from '../../utils/storage';
-import { Fonts, Radius, s, vs } from '../../theme/sizeMatter';
+import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 
-const SettingsScreen = ({ navigation }) => {
+const SettingsScreen = () => {
   const { colors } = useTheme();
-  const user = useAuthStore(state => state.user);
-  const isLoggedIn = !!user;
+  const navigation = useNavigation();
+  const [state, setState] = useState({
+    user: null,
+    isSigningOut: false,
+  });
+  const updateState = value => setState(prev => ({ ...prev, ...value }));
 
-  // Settings states
-  const themeMode = useSettingsStore(state => state.themeMode);
-  const pinEnabled = useSettingsStore(state => state.pinEnabled);
-  const biometricEnabled = useSettingsStore(state => state.biometricEnabled);
-  const pinCode = useSettingsStore(state => state.pinCode);
+  const loadUser = useCallback(async () => {
+    const { data } = await supabase.auth.getUser();
+    updateState({ user: data?.user || null });
+  }, []);
 
-  const setThemeMode = useSettingsStore(state => state.setThemeMode);
-  const setPinEnabled = useSettingsStore(state => state.setPinEnabled);
-  const setBiometricEnabled = useSettingsStore(state => state.setBiometricEnabled);
-  const setPinCode = useSettingsStore(state => state.setPinCode);
+  useFocusEffect(
+    useCallback(() => {
+      loadUser();
+    }, [loadUser]),
+  );
 
-  // Modal states
-  const [pinModalVisible, setPinModalVisible] = useState(false);
-  const [pinModalMode, setPinModalMode] = useState('set'); // 'set' | 'verify'
-  const [pinPurpose, setPinPurpose] = useState(''); // 'enable' | 'disable' | 'change_verify' | 'change_set'
+  const handleSignOut = async () => {
+    updateState({ isSigningOut: true });
 
-  const handlePinToggle = (value) => {
-    if (value) {
-      setPinModalMode('set');
-      setPinPurpose('enable');
-      setPinModalVisible(true);
-    } else {
-      setPinModalMode('verify');
-      setPinPurpose('disable');
-      setPinModalVisible(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        throw error;
+      }
+
+      showToast('success', 'Signed out', 'See you next time.');
+      const rootNavigation = navigation.getParent() || navigation;
+      rootNavigation.reset({
+        index: 0,
+        routes: [{ name: ROUTES.SIGN_IN }],
+      });
+    } catch (error) {
+      showToast('error', 'Sign out failed', error.message || 'Please try again.');
+    } finally {
+      updateState({ isSigningOut: false });
     }
   };
 
-  const handlePinSuccess = (code) => {
-    setPinModalVisible(false);
-
-    if (pinPurpose === 'enable') {
-      setPinCode(code);
-      setPinEnabled(true);
-      showToast('success', 'PIN Enabled', 'Passcode lock has been enabled.');
-    } else if (pinPurpose === 'disable') {
-      setPinEnabled(false);
-      showToast('success', 'PIN Disabled', 'Passcode lock has been disabled.');
-    } else if (pinPurpose === 'change_verify') {
-      // verified existing pin, now show setup for new pin
-      setTimeout(() => {
-        setPinModalMode('set');
-        setPinPurpose('change_set');
-        setPinModalVisible(true);
-      }, 300);
-    } else if (pinPurpose === 'change_set') {
-      setPinCode(code);
-      showToast('success', 'PIN Updated', 'Passcode lock PIN has been changed.');
-    }
-  };
-
-  const handleChangePin = () => {
-    setPinModalMode('verify');
-    setPinPurpose('change_verify');
-    setPinModalVisible(true);
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-              showToast('error', 'Logout Failed', error.message);
-            } else {
-              showToast('success', 'Logged Out', 'You have been signed out.');
-              navigation.reset({
-                index: 0,
-                routes: [{ name: ROUTES.WELCOME }],
-              });
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handleResetData = () => {
-    Alert.alert(
-      'Reset All Data',
-      'This will delete all folders, budgets, tasks, and settings permanently. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset Everything',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await supabase.auth.signOut();
-              storage.clearAll();
-              
-              // Reset settings in memory
-              setThemeMode('system');
-              setPinEnabled(false);
-              setBiometricEnabled(false);
-              
-              showToast('success', 'Data Reset', 'All local data has been reset.');
-              navigation.reset({
-                index: 0,
-                routes: [{ name: ROUTES.WELCOME }],
-              });
-            } catch (error) {
-              showToast('error', 'Reset Failed', error.message || 'An error occurred.');
-            }
-          },
-        },
-      ]
-    );
-  };
+  const name = state.user?.user_metadata?.full_name || 'Fikr user';
+  const email = state.user?.email || 'No email found';
 
   return (
     <AppContainer contentStyle={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <Animated.View entering={FadeInDown.delay(50).duration(400)} style={styles.header}>
-          <AppText muted style={styles.eyebrow}>Settings</AppText>
-          <AppText variant="heading" style={[styles.title, { color: colors.primary }]}>
-            Preferences
-          </AppText>
-        </Animated.View>
+      <View style={styles.header}>
+        <AppText muted style={styles.eyebrow}>Settings</AppText>
+        <AppText variant="heading" style={[styles.title, { color: colors.primary }]}>
+          Account
+        </AppText>
+      </View>
 
-        {/* Account Module Card */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <AppText style={styles.sectionHeader}>Account</AppText>
-          {isLoggedIn ? (
-            <View style={styles.accountInfo}>
-              <View style={styles.profileMeta}>
-                <AppText style={styles.profileName}>
-                  {user.user_metadata?.name || 'Fikr User'}
-                </AppText>
-                <AppText muted style={styles.profileEmail}>
-                  {user.email}
-                </AppText>
-              </View>
-              <AppButton variant="secondary" style={styles.logoutBtn} onPress={handleLogout}>
-                Log Out
-              </AppButton>
-            </View>
-          ) : (
-            <View style={styles.guestPanel}>
-              <AppText muted style={styles.guestText}>
-                You are currently using the app in Guest Mode. Register or log in to sync your budgets and tasks across devices.
-              </AppText>
-              <AppButton style={styles.loginBtn} onPress={() => navigation.navigate(ROUTES.SIGN_IN)}>
-                Log In / Sign Up
-              </AppButton>
-            </View>
-          )}
-        </Animated.View>
-
-        {/* Security Module Card */}
-        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <AppText style={styles.sectionHeader}>Security</AppText>
-          
-          <SettingsRow
-            iconName="Lock"
-            title="Passcode Lock"
-            description="Secure the app with a 4-digit PIN"
-            rightElement={
-              <SettingsSwitch
-                value={pinEnabled}
-                onValueChange={handlePinToggle}
-              />
-            }
-          />
-
-          {pinEnabled && (
-            <>
-              <SettingsRow
-                iconName="Fingerprint"
-                title="Biometric Authentication"
-                description="Unlock the app using fingerprint/face"
-                rightElement={
-                  <SettingsSwitch
-                    value={biometricEnabled}
-                    onValueChange={(val) => {
-                      setBiometricEnabled(val);
-                      showToast('success', val ? 'Biometrics Enabled' : 'Biometrics Disabled');
-                    }}
-                  />
-                }
-              />
-              <SettingsRow
-                iconName="Key"
-                title="Change Passcode PIN"
-                description="Update your security code"
-                onPress={handleChangePin}
-              />
-            </>
-          )}
-        </Animated.View>
-
-        {/* App Configuration Card */}
-        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <AppText style={styles.sectionHeader}>App settings</AppText>
-
-          <View style={styles.themeRow}>
-            <View style={styles.themeCopy}>
-              <AppText style={styles.rowTitle}>Theme preference</AppText>
-              <AppText muted style={styles.rowDesc}>Choose light, dark, or system matching</AppText>
-            </View>
-            <View style={[styles.selectorContainer, { backgroundColor: colors.background }]}>
-              {['system', 'light', 'dark'].map((mode) => {
-                const isActive = themeMode === mode;
-                return (
-                  <View
-                    key={mode}
-                    style={[
-                      styles.selectorButton,
-                      isActive && { backgroundColor: colors.card, shadowColor: colors.shadow },
-                    ]}
-                  >
-                    <AppText
-                      onPress={() => setThemeMode(mode)}
-                      style={[
-                        styles.selectorText,
-                        isActive ? { color: colors.primary, fontWeight: Fonts.weight.bold } : { color: colors.textSecondary },
-                      ]}
-                    >
-                      {mode}
-                    </AppText>
-                  </View>
-                );
-              })}
-            </View>
+      <View
+        style={[
+          styles.profileCard,
+          {
+            backgroundColor: colors.card,
+            borderColor: colors.border,
+            shadowColor: colors.shadow,
+          },
+        ]}>
+        <View style={[styles.avatar, { backgroundColor: `${colors.primary}18` }]}>
+          <UserRound size={icon(28)} color={colors.primary} />
+        </View>
+        <View style={styles.profileCopy}>
+          <AppText style={styles.name}>{name}</AppText>
+          <View style={styles.emailRow}>
+            <Mail size={icon(15)} color={colors.textSecondary} />
+            <AppText muted numberOfLines={1} style={styles.email}>
+              {email}
+            </AppText>
           </View>
+        </View>
+      </View>
 
-          <SettingsRow
-            iconName="Trash"
-            title="Reset All Data"
-            description="Clear all folders, tasks, and settings"
-            onPress={handleResetData}
-            danger
-          />
-        </Animated.View>
-      </ScrollView>
+      <Pressable
+        style={[
+          styles.settingRow,
+          { borderColor: colors.border, backgroundColor: colors.card },
+        ]}
+        onPress={handleSignOut}
+        disabled={state.isSigningOut}>
+        <View style={[styles.rowIcon, { backgroundColor: `${colors.error}12` }]}>
+          <LogOut size={icon(18)} color={colors.error} />
+        </View>
+        <View style={styles.rowCopy}>
+          <AppText style={styles.rowTitle}>Sign out</AppText>
+          <AppText muted style={styles.rowSubtitle}>
+            End this session on your device.
+          </AppText>
+        </View>
+      </Pressable>
 
-      {/* PIN entry modal */}
-      <PinModal
-        visible={pinModalVisible}
-        mode={pinModalMode}
-        correctPin={pinCode}
-        onClose={() => setPinModalVisible(false)}
-        onSuccess={handlePinSuccess}
-      />
+      <AppButton
+        onPress={handleSignOut}
+        loading={state.isSigningOut}
+        variant="secondary"
+        style={styles.signOutButton}>
+        Sign out
+      </AppButton>
     </AppContainer>
   );
 };
@@ -276,13 +123,8 @@ export default SettingsScreen;
 
 const styles = StyleSheet.create({
   screen: {
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
     paddingHorizontal: s(24),
-    paddingTop: vs(14),
-    paddingBottom: vs(42),
+    paddingTop: vs(22),
   },
   header: {
     marginBottom: vs(18),
@@ -294,97 +136,68 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Fonts.size.heading,
-    lineHeight: vs(34),
+    lineHeight: lineHeight(30, 1.2),
   },
-  card: {
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     padding: s(16),
-    marginBottom: vs(16),
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: vs(4) },
-        shadowOpacity: 0.04,
-        shadowRadius: s(10),
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    marginBottom: vs(18),
   },
-  sectionHeader: {
-    fontSize: Fonts.size.bodySmall,
-    fontWeight: Fonts.weight.bold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: vs(12),
+  avatar: {
+    width: s(56),
+    height: s(56),
+    borderRadius: Radius.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: s(14),
   },
-  accountInfo: {
-    gap: vs(14),
+  profileCopy: {
+    flex: 1,
   },
-  profileMeta: {
-    gap: vs(2),
-  },
-  profileName: {
-    fontSize: Fonts.size.subtitle,
+  name: {
+    fontSize: Fonts.size.bodyLarge,
     fontWeight: Fonts.weight.bold,
   },
-  profileEmail: {
-    fontSize: Fonts.size.bodySmall,
-  },
-  logoutBtn: {
-    height: vs(36),
+  emailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: vs(4),
+    gap: s(6),
   },
-  guestPanel: {
-    gap: vs(14),
-  },
-  guestText: {
+  email: {
+    flex: 1,
     fontSize: Fonts.size.bodySmall,
-    lineHeight: vs(18),
   },
-  loginBtn: {
-    height: vs(36),
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: Radius.md,
+    padding: s(14),
   },
-  themeRow: {
-    paddingVertical: vs(12),
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent', // just spacer
+  rowIcon: {
+    width: s(42),
+    height: s(42),
+    borderRadius: Radius.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: s(12),
   },
-  themeCopy: {
-    marginBottom: vs(10),
+  rowCopy: {
+    flex: 1,
   },
   rowTitle: {
-    fontSize: Fonts.size.body,
+    fontSize: Fonts.size.bodySmall,
     fontWeight: Fonts.weight.bold,
   },
-  rowDesc: {
+  rowSubtitle: {
     fontSize: Fonts.size.caption,
     marginTop: vs(2),
   },
-  selectorContainer: {
-    flexDirection: 'row',
-    borderRadius: Radius.md,
-    padding: s(2),
-  },
-  selectorButton: {
-    flex: 1,
-    paddingVertical: vs(8),
-    alignItems: 'center',
-    borderRadius: Radius.sm,
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 1,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
-  },
-  selectorText: {
-    fontSize: Fonts.size.bodySmall,
-    textTransform: 'capitalize',
+  signOutButton: {
+    marginTop: vs(24),
   },
 });
