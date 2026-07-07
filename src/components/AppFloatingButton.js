@@ -46,7 +46,7 @@ const FloatingSubButton = ({
     });
 
     return (
-        <Animated.View 
+        <Animated.View
             needsOffscreenAlphaCompositing={true}
             style={[styles.subButtonAnimated, animatedStyle]}>
             <Pressable

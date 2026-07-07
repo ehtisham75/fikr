@@ -19,7 +19,6 @@ import ROUTES from '../../utils/routes';
 import { AppLogo } from '../../components';
 import { supabase } from '../../lib/supabase';
 import { Fonts, SCREEN_HEIGHT, SCREEN_WIDTH, lineHeight, s, vs } from '../../theme/sizeMatter';
-import { supabase } from '../../lib/supabase';
 
 const SplashScreen = ({ navigation }) => {
   const { colors } = useTheme();

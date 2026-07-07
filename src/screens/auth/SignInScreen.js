@@ -122,24 +122,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: s(24),
         paddingTop: vs(60),
     },
-    header: {
-        marginBottom: vs(40),
-        marginTop: vs(20),
-    },
-    logo: {
-        alignSelf: 'center',
-    },
-    title: {
-        fontSize: Fonts.size.title,
-        lineHeight: lineHeight(36, 1.22),
-    },
-    subtitle: {
-        fontSize: Fonts.size.body,
-        marginTop: vs(8),
-    },
-    form: {
-        marginBottom: vs(32),
-    },
     forgotPasswordContainer: {
         alignSelf: 'flex-end',
         paddingVertical: vs(8),
