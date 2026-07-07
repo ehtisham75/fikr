@@ -18,6 +18,7 @@ const ROUTES = {
     ADD_NEW_FOLDER: 'AddNewFolder',
     ADD_NEW_TASK: 'AddNewTask',
     TODAY_TASKS: 'TodayTasks',
+    FOLDER_DETAILS: 'FolderDetails',
     // 
     NOTIFICATIONS: 'Notifications',
     HELP: 'Help',

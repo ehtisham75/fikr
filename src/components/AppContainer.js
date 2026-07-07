@@ -12,7 +12,8 @@ const AppContainer = ({ children, contentStyle,
   const isFocused = useIsFocused()
   const isAndroid = Platform.OS === 'android'
 
-  const Container = isAndroid ? View : safeArea ? SafeAreaView : View
+  // const Container = isAndroid ? View : safeArea ? SafeAreaView : View
+  const Container = safeArea ? SafeAreaView : View
   return (
     <Container
       style={[

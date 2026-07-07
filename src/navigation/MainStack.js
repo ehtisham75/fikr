@@ -11,6 +11,7 @@ import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen'
 import SetNewPasswordScreen from '../screens/auth/SetNewPasswordScreen'
 import AddNewFolderScreen from '../screens/home/AddNewFolderScreen'
 import AddNewTaskScreen from '../screens/home/AddNewTaskScreen'
+import FolderDetailsScreen from '../screens/home/FolderDetailsScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -32,6 +33,7 @@ const MainStack = () => {
       <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigation} />
       <Stack.Screen name={ROUTES.ADD_NEW_FOLDER} component={AddNewFolderScreen} />
       <Stack.Screen name={ROUTES.ADD_NEW_TASK} component={AddNewTaskScreen} />
+      <Stack.Screen name={ROUTES.FOLDER_DETAILS} component={FolderDetailsScreen} />
     </Stack.Navigator>
   )
 }
