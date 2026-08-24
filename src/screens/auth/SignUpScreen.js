@@ -67,7 +67,11 @@ const SignUpScreen = ({ navigation }) => {
         flow: 'signup',
       });
     } catch (error) {
+
+      printLogs(data, 'signup failed why')
+
       showToast('error', 'Signup failed', getAuthErrorMessage(error));
+      console.log(error);
     } finally {
       updateState({ isLoading: false });
     }
