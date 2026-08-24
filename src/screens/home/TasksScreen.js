@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,15 +9,18 @@ import {
 } from 'react-native';
 import dayjs from 'dayjs';
 import { useFocusEffect, useTheme } from '@react-navigation/native';
-import { CalendarDays, Clock3, Plus, WifiOff } from 'lucide-react-native';
-import { AppButton, AppContainer, AppText } from '../../components';
+import { CalendarDays, Clock3, Plus, WifiOff, CheckCircle2, Circle, Trash2 } from 'lucide-react-native';
+import { AppButton, AppContainer, AppText, LoginBottomSheet } from '../../components';
 import { useTaskStore } from '../../store/taskStore';
+import { useAuthStore } from '../../store/authStore';
 import ROUTES from '../../utils/routes';
+import { showToast } from '../../utils/helper';
 import { Fonts, Radius, icon, lineHeight, s, vs } from '../../theme/sizeMatter';
 
-const TaskListItem = ({ item }) => {
+const TaskListItem = ({ item, onToggle, onDelete }) => {
   const { colors } = useTheme();
   const dueLabel = dayjs(`${item.due_date} ${item.due_time}`).format('MMM D, h:mm A');
+  const isCompleted = !!item.is_completed;
 
   return (
     <View
@@ -25,19 +28,42 @@ const TaskListItem = ({ item }) => {
         styles.taskRow,
         {
           backgroundColor: colors.card,
-          borderColor: colors.border,
+          borderColor: isCompleted ? colors.border : colors.border,
           shadowColor: colors.shadow,
+          opacity: isCompleted ? 0.6 : 1,
         },
       ]}>
-      <View style={[styles.rowIcon, { backgroundColor: `${colors.primary}18` }]}>
-        <Clock3 size={icon(18)} color={colors.primary} />
-      </View>
+      <Pressable
+        onPress={() => onToggle(item.id)}
+        hitSlop={8}
+        style={({ pressed }) => [
+          styles.checkContainer,
+          pressed && { opacity: 0.7 }
+        ]}>
+        {isCompleted ? (
+          <CheckCircle2 size={icon(20)} color={colors.primary} />
+        ) : (
+          <Circle size={icon(20)} color={colors.textSecondary} />
+        )}
+      </Pressable>
+
       <View style={styles.rowCopy}>
-        <AppText numberOfLines={1} style={styles.rowTitle}>
+        <AppText
+          numberOfLines={1}
+          style={[
+            styles.rowTitle,
+            isCompleted && { textDecorationLine: 'line-through', color: colors.textSecondary }
+          ]}>
           {item.title}
         </AppText>
         {!!item.notes && (
-          <AppText muted numberOfLines={2} style={styles.rowNotes}>
+          <AppText
+            muted
+            numberOfLines={2}
+            style={[
+              styles.rowNotes,
+              isCompleted && { textDecorationLine: 'line-through' }
+            ]}>
             {item.notes}
           </AppText>
         )}
@@ -45,12 +71,24 @@ const TaskListItem = ({ item }) => {
           {dueLabel} • {item.priority}
         </AppText>
       </View>
-      {item.sync_status === 'pending' && (
-        <View style={[styles.syncPill, { backgroundColor: `${colors.warning}18` }]}>
-          <WifiOff size={icon(14)} color={colors.warning} />
-          <AppText style={[styles.syncText, { color: colors.warning }]}>Offline</AppText>
-        </View>
-      )}
+
+      <View style={styles.rightActions}>
+        {item.sync_status === 'pending' && (
+          <View style={[styles.syncPill, { backgroundColor: `${colors.warning}18`, marginRight: s(6) }]}>
+            <WifiOff size={icon(12)} color={colors.warning} />
+          </View>
+        )}
+        <Pressable
+          onPress={() => onDelete(item.id)}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            { backgroundColor: `${colors.error}14` },
+            pressed && { opacity: 0.6 },
+          ]}>
+          <Trash2 size={icon(16)} color={colors.error} />
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -60,15 +98,26 @@ const TasksScreen = ({ navigation }) => {
   const tasks = useTaskStore(state => state.tasks);
   const isLoading = useTaskStore(state => state.isLoading);
   const loadTasks = useTaskStore(state => state.loadTasks);
+  const toggleTask = useTaskStore(state => state.toggleTask);
+  const deleteTask = useTaskStore(state => state.deleteTask);
+  const [showLoginSheet, setShowLoginSheet] = useState(false);
 
-  const sortedTasks = useMemo(() => (
-    [...tasks].sort((first, second) => {
+  const user = useAuthStore(state => state.user);
+  const isLoggedIn = !!user;
+
+  const sortedTasks = useMemo(() => {
+    // Sort tasks: incomplete ones first, then completed ones. Within each group, sort by due time.
+    const sorted = [...tasks].sort((first, second) => {
       const firstTime = `${first.due_date || ''} ${first.due_time || '00:00'}`;
       const secondTime = `${second.due_date || ''} ${second.due_time || '00:00'}`;
-
       return firstTime.localeCompare(secondTime);
-    })
-  ), [tasks]);
+    });
+
+    const incomplete = sorted.filter(t => !t.is_completed);
+    const completed = sorted.filter(t => t.is_completed);
+
+    return [...incomplete, ...completed];
+  }, [tasks]);
 
   const todayCount = useMemo(() => {
     const today = dayjs().format('YYYY-MM-DD');
@@ -77,12 +126,39 @@ const TasksScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      loadTasks();
-    }, [loadTasks]),
+      if (isLoggedIn) {
+        loadTasks();
+      }
+    }, [isLoggedIn, loadTasks]),
   );
 
   const navigateToAddTask = () => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+      return;
+    }
     navigation.navigate(ROUTES.ADD_NEW_TASK);
+  };
+
+  const handleLoginPress = () => {
+    navigation.navigate(ROUTES.SIGN_IN);
+  };
+
+  const handleToggleTask = async (taskId) => {
+    try {
+      await toggleTask(taskId);
+    } catch (error) {
+      showToast('error', 'Update failed', error.message || 'Could not update task.');
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await deleteTask(taskId);
+      showToast('success', 'Task deleted', 'Task has been removed.');
+    } catch (error) {
+      showToast('error', 'Delete failed', error.message || 'Could not delete task.');
+    }
   };
 
   const renderEmpty = () => {
@@ -108,7 +184,13 @@ const TasksScreen = ({ navigation }) => {
       <FlatList
         data={sortedTasks}
         keyExtractor={item => String(item.id)}
-        renderItem={({ item }) => <TaskListItem item={item} />}
+        renderItem={({ item }) => (
+          <TaskListItem
+            item={item}
+            onToggle={handleToggleTask}
+            onDelete={handleDeleteTask}
+          />
+        )}
         ListHeaderComponent={(
           <View>
             <View style={styles.header}>
@@ -143,6 +225,12 @@ const TasksScreen = ({ navigation }) => {
             tintColor={colors.primary}
           />
         )}
+      />
+
+      <LoginBottomSheet
+        visible={showLoginSheet}
+        onClose={() => setShowLoginSheet(false)}
+        onLogin={handleLoginPress}
       />
     </AppContainer>
   );
@@ -199,13 +287,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  rowIcon: {
-    width: s(38),
-    height: s(38),
-    borderRadius: Radius.round,
-    alignItems: 'center',
-    justifyContent: 'center',
+  checkContainer: {
     marginRight: s(12),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rowCopy: {
     flex: 1,
@@ -225,17 +310,23 @@ const styles = StyleSheet.create({
     marginTop: vs(4),
     textTransform: 'capitalize',
   },
-  syncPill: {
-    minHeight: vs(28),
-    borderRadius: Radius.round,
-    paddingHorizontal: s(8),
+  rightActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: s(4),
   },
-  syncText: {
-    fontSize: Fonts.size.caption,
-    fontWeight: Fonts.weight.bold,
+  deleteButton: {
+    width: s(34),
+    height: s(34),
+    borderRadius: Radius.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  syncPill: {
+    minHeight: vs(24),
+    width: s(24),
+    borderRadius: Radius.round,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyState: {
     borderWidth: 1,

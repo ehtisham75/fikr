@@ -33,7 +33,7 @@ export const getAuthErrorMessage = error => {
   }
 
   if (normalized.includes('rate limit') || normalized.includes('security purposes')) {
-    return 'Please wait a moment before trying again.';
+    return 'Please wait a moment before trying again, you exceeded the limit';
   }
 
   return message;

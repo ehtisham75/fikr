@@ -40,3 +40,8 @@ export const formatStatusLabel = (status) => {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 }
+
+export const printLogs = (object, title = 'printLogs') => {
+    console.log(`=================== ${title} ==================`);
+    console.log(JSON.stringify(object, null, 2));
+}
