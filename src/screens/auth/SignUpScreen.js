@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import ROUTES from '../../utils/routes';
 import { signupSchema } from '../../utils/authValidator';
 import { formatZodErrors, getAuthErrorMessage } from '../../utils/authHelpers';
-import { showToast } from '../../utils/helper';
+import { showToast, printLogs } from '../../utils/helper';
 import { Fonts, vs } from '../../theme/sizeMatter';
 import resetNavigation from '../../utils/resetNavigation';
 import AuthScaffold from './components/AuthScaffold';
@@ -68,10 +68,9 @@ const SignUpScreen = ({ navigation }) => {
       });
     } catch (error) {
 
-      printLogs(data, 'signup failed why')
+      printLogs(error, 'signup failed why')
 
       showToast('error', 'Signup failed', getAuthErrorMessage(error));
-      console.log(error);
     } finally {
       updateState({ isLoading: false });
     }

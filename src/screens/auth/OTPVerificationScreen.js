@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import ROUTES from '../../utils/routes';
 import { otpSchema } from '../../utils/authValidator';
 import { formatZodErrors, getAuthErrorMessage } from '../../utils/authHelpers';
-import { showToast } from '../../utils/helper';
+import { printLogs, showToast } from '../../utils/helper';
 import { Fonts, Radius, lineHeight, s, vs } from '../../theme/sizeMatter';
 import AuthScaffold from './components/AuthScaffold';
 import resetNavigation from '../../utils/resetNavigation';
@@ -55,7 +55,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: state.otp,
-        type: isRecovery ? 'recovery' : 'email',
+        type: isRecovery ? 'recovery' : 'signup',
       });
 
       if (error) {
@@ -97,6 +97,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       showToast('success', 'Code sent', 'Check your email for the latest code.');
     } catch (error) {
       showToast('error', 'Resend failed', getAuthErrorMessage(error));
+      printLogs(error, 'resend failed');
     } finally {
       updateState({ isResending: false });
     }
