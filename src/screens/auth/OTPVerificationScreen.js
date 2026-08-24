@@ -97,7 +97,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       showToast('success', 'Code sent', 'Check your email for the latest code.');
     } catch (error) {
       showToast('error', 'Resend failed', getAuthErrorMessage(error));
-      printLogs(error, 'resend failed');
+      // printLogs(error, 'resend failed');
     } finally {
       updateState({ isResending: false });
     }

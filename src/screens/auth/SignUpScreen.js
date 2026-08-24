@@ -68,7 +68,7 @@ const SignUpScreen = ({ navigation }) => {
       });
     } catch (error) {
 
-      printLogs(error, 'signup failed why')
+      // printLogs(error, 'signup failed why')
 
       showToast('error', 'Signup failed', getAuthErrorMessage(error));
     } finally {
